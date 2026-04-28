@@ -18,9 +18,9 @@ def _make_dummy_observation(server_config: policy_server.PolicyServerConfig) -> 
             obs["observation/wrist_image_right"] = np.zeros((h, w, 3), dtype=np.uint8)
     if server_config.n_external_cameras > 0:
         for i in range(server_config.n_external_cameras):
-            obs[f"observation/exterior_image_{i}_left"] = np.zeros((h, w, 3), dtype=np.uint8)
+            obs[f"observation/exterior_image_{i+1}_left"] = np.zeros((h, w, 3), dtype=np.uint8)
             if server_config.needs_stereo_camera:
-                obs[f"observation/exterior_image_{i}_right"] = np.zeros((h, w, 3), dtype=np.uint8)
+                obs[f"observation/exterior_image_{i+1}_right"] = np.zeros((h, w, 3), dtype=np.uint8)
     if server_config.needs_session_id:
         obs["session_id"] = "38DSA3hd3"
     obs["observation/joint_position"] = np.zeros(7, dtype=np.float32)
