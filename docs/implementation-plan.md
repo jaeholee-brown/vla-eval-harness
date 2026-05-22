@@ -438,8 +438,8 @@ Recommended first implementation order inside Phase 3:
 Status update:
 
 - satisfied for the protocol foundation, bridge helpers, skeletons, and cookbook
-- still unproven with a live true-bimanual policy-plus-embodiment path
-- the bridge path is unit-tested, but the next substantive work is Phase 4 adapter delivery
+- phase-4 code delivery is now complete in-tree
+- still unproven with a live true-bimanual policy-plus-embodiment path on GPU/hardware
 
 ### Phase 4: full adapters on the internal representation
 
@@ -466,8 +466,17 @@ template for later adapters.
 
 Authoring-goal deliverables for Phase 4:
 
-- after each adapter ships, the cookbook gains a worked example section showing the exact upstream-artifact → harness-field mapping for that adapter
-- the cookbook gains a "Mapping common upstream artifact shapes" appendix with one concrete example per shape category, drawn from the four real adapters now in tree
+- shipped: four real phase-4 reference adapters are now in tree:
+  - `MolmoAct2YAMPolicyAdapter`
+  - `GR00TPolicyAdapter`
+  - `YAMBimanualAdapter`
+  - `DK1BimanualAdapter`
+- shipped: concrete official-runtime backend wrappers are now in tree where source code made them explicit:
+  - `YAMRobotEnvBackend`
+  - `LeRobotBiDK1Backend`
+- shipped: the cookbook now uses numbered sections and the skeleton TODOs link to them
+- shipped: every shipped adapter and runner now has a CPU-only smoke test
+- remaining: one outside contributor or coding agent still needs to add a fifth adapter from the cookbook alone to prove the authoring claim in practice
 
 ### Phase 4 exit gate — the authoring claim
 
@@ -485,7 +494,7 @@ The fifth adapter does not have to be production-grade. It must:
 - pass its own parity gates
 - have been authored without the harness maintainer rewriting it
 
-This is the test that proves the harness has earned its authoring claim. Until this passes, Phase 4 is not closed.
+This is the test that proves the harness has earned its authoring claim. Code delivery for Phase 4 is complete, but the authoring claim is not closed until this passes.
 
 ## Fairness Rules
 
@@ -535,7 +544,7 @@ Do this before anything else:
 6. run at least one fail-on-purpose manual check
 7. record the tolerances and outcome
 
-This step is now complete for `OpenPI`, so the next concrete work is the Phase 2 runtime spikes.
+This step is now complete for `OpenPI`.
 
 The exact commands are already documented in:
 
@@ -547,14 +556,14 @@ The next spike checklist is documented in:
 
 ## Immediate Next Commit After GPU Validation
 
-After GPU validation, the next work should be:
+After the current code state, the next work is live validation:
 
-1. define the internal representation using the concrete failures in `docs/pain/current-schema-observed-pain.md`
-2. add the migration layer from the current flat schema
-3. start the adapter / cookbook skeleton work required by the authoring north star
+1. validate `MolmoAct2YAMPolicyAdapter` against the official YAM FastAPI server on a GPU machine
+2. validate `GR00TPolicyAdapter` against the official managed-local-server path on a GPU machine
+3. validate `YAMRobotEnvBackend` on a real bimanual YAM setup
+4. validate `LeRobotBiDK1Backend` on a real bimanual DK-1 setup
+5. then ask a fresh coding agent or outside contributor to add a fifth adapter from the cookbook alone
 
-One additional test is recommended but not gating for Phase 2:
+The live-validation checklist is documented in:
 
-- run the real `DK-1` dry-run / bounded-motion smoke once the hardware backend is wired, because the current embodiment tests are still placeholders
-
-That report should be committed before any internal-representation code is written.
+- `docs/runbooks/phase-4-live-integration.md`

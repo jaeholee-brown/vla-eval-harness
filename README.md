@@ -36,14 +36,18 @@ Implemented now:
 - an upstream-default source map for future adapter templates
 - bimanual-first internal representation dataclasses and current-schema bridge wrappers
 - runnable policy, embodiment, and parity skeletons for future adapters
-- adapter-authoring cookbook for future coding agents
+- adapter-authoring cookbook with numbered TODO-to-cookbook links
+- CPU-only smoke-test coverage for every shipped adapter and runner
+- real `MolmoAct2-BimanualYAM` policy adapter on the internal representation
+- real true-bimanual `YAM` embodiment adapter plus a thin official-`RobotEnv` backend wrapper
+- real true-bimanual `DK-1` embodiment adapter plus a thin official-`bi_dk1_follower` backend wrapper
+- real `GR00T` managed-local-server adapter on the internal representation
 
 Not implemented yet:
 
-- real `MolmoAct2-BimanualYAM` adapter
-- real true-bimanual `YAM` embodiment adapter
-- real true-bimanual `DK-1` embodiment adapter
-- real `GR00T` adapter on the new representation
+- live GPU validation for the new `MolmoAct2` and `GR00T` adapters
+- live bimanual hardware validation for the `YAM` and `DK-1` embodiment backends
+- at least one end-to-end true-bimanual run that closes the phase-4 authoring claim in the real world
 
 ## Install
 
@@ -82,12 +86,13 @@ Step-by-step instructions for the runtime spikes are in
 The full implementation plan and phase ordering are in
 [docs/implementation-plan.md](docs/implementation-plan.md).
 
-Phase 3 foundations are now implemented: the transport-neutral, bimanual-first
-internal representation exists, and the historical flat-schema path can be
-bridged into it explicitly.
+Phase 3 and the code-delivery part of Phase 4 are now implemented: the
+transport-neutral, bimanual-first internal representation exists, the
+historical flat-schema path can be bridged into it explicitly, and the first
+real true-bimanual adapters are in tree with CPU-only smoke coverage.
 
-The next implementation target is the first real true-bimanual adapters on top
-of that representation.
+The next implementation target is live validation of those adapters on a GPU
+machine and real bimanual hardware.
 
 The phase-2 source-backed artifacts that justify that work are in:
 
@@ -95,6 +100,7 @@ The phase-2 source-backed artifacts that justify that work are in:
 - [docs/spikes/artifacts/molmoact2-current-schema.json](docs/spikes/artifacts/molmoact2-current-schema.json)
 - [docs/spikes/upstream-default-source-map.md](docs/spikes/upstream-default-source-map.md)
 - [docs/cookbook/adapter-authoring.md](docs/cookbook/adapter-authoring.md)
+- [docs/runbooks/phase-4-live-integration.md](docs/runbooks/phase-4-live-integration.md)
 
 ## Upstream Boundary
 
