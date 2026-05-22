@@ -1,0 +1,14 @@
+This repository includes third-party code from the following upstream projects:
+
+1. robo-arena/roboarena
+   - Source: https://github.com/robo-arena/roboarena
+   - Pinned commit: a07f93d
+   - License: MIT
+
+2. Physical-Intelligence/openpi
+   - Source: https://github.com/Physical-Intelligence/openpi
+   - License: Apache-2.0
+   - The vendored upstream files `policy_client.py` and `utils/msgpack_numpy.py` in
+     `vla_harness/_upstream/roboarena/` were originally copied from openpi into RoboArena.
+
+See `THIRD_PARTY_NOTICES.md` and `vla_harness/_upstream/roboarena/PROVENANCE.md` for details.
