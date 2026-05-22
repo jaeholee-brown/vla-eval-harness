@@ -12,6 +12,9 @@ from vla_harness.adapters.policy.gr00t import Gr00tVideoBinding
 from vla_harness.adapters.policy.molmoact2_yam import MolmoAct2YAMPolicyAdapter
 from vla_harness.adapters.policy.molmoact2_yam import MolmoAct2YAMRuntimeConfig
 from vla_harness.adapters.policy.base import CurrentSchemaPolicyAdapter
+from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaClient
+from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaPolicyAdapter
+from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaRuntimeConfig
 from vla_harness.adapters.policy.openpi_current_schema import OpenPICurrentSchemaAdapter
 from vla_harness.adapters.policy.openpi_current_schema import OpenPIRuntimeConfig
 
@@ -26,6 +29,9 @@ __all__ = [
     "Gr00tVideoBinding",
     "MolmoAct2YAMPolicyAdapter",
     "MolmoAct2YAMRuntimeConfig",
+    "OpenPIAlohaClient",
+    "OpenPIAlohaPolicyAdapter",
+    "OpenPIAlohaRuntimeConfig",
     "OpenPICurrentSchemaAdapter",
     "OpenPIRuntimeConfig",
     "PolicyTemplateConfig",
