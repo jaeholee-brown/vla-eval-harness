@@ -148,6 +148,67 @@ be slower and can depend on a GPU or real checkpoints later.
 
 If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
+### 2.7 Worked example: openpi `pi0_aloha_pen_uncap`
+
+This adapter is the canonical worked example of the rules above: a true-bimanual
+openpi policy wired through the official websocket server, with every field
+sourced from upstream openpi code.
+
+Upstream artifacts used:
+
+- repo: `Physical-Intelligence/openpi`
+- training config: `src/openpi/training/config.py` entry `pi0_aloha_pen_uncap`
+  (`default_prompt="uncap the pen"`, three-camera repack, Trossen asset_id)
+- model defaults: `src/openpi/models/pi0_config.py` (`action_horizon=50`)
+- request schema: `src/openpi/policies/aloha_policy.py`
+  (`AlohaInputs(adapt_to_pi=True)` and `AlohaOutputs(adapt_to_pi=True)`,
+  14-D state and action with `[arm6, gripper1, arm6, gripper1]`)
+- runtime: `docs/remote_inference.md` plus `scripts/serve_policy.py`
+- checkpoint: `gs://openpi-assets/checkpoints/pi0_aloha_pen_uncap`
+
+What the adapter copies verbatim from upstream and tags as `official`:
+
+- `config_name = "pi0_aloha_pen_uncap"`
+- `checkpoint_ref = "gs://openpi-assets/checkpoints/pi0_aloha_pen_uncap"`
+- `chunk_size / action_horizon = 50`
+- camera keys `cam_high`, `cam_left_wrist`, `cam_right_wrist`
+- state and action layout per arm: `joint_plus_gripper`, dim 7
+- action semantics: `absolute` / `joint`
+- image preprocess: `resize_with_pad` at 224×224, uint8 RGB, CHW on the wire
+- `adapt_to_pi = True`
+
+Minimal local launch (real GPU machine):
+
+```bash
+uv run scripts/serve_policy.py policy:checkpoint \
+    --policy.config=pi0_aloha_pen_uncap \
+    --policy.dir=gs://openpi-assets/checkpoints/pi0_aloha_pen_uncap
+```
+
+Driving the adapter from harness code:
+
+```python
+from vla_harness.adapters.policy import OpenPIAlohaPolicyAdapter
+from vla_harness.adapters.policy import OpenPIAlohaRuntimeConfig
+
+adapter = OpenPIAlohaPolicyAdapter(
+    OpenPIAlohaRuntimeConfig(host="127.0.0.1", port=8000),
+)
+adapter.assert_ready_for_benchmark()
+manifest = adapter.build_manifest()
+action_packet = adapter.infer(observation_packet)  # ObservationPacket built per manifest
+```
+
+CPU-only smoke test pattern: see
+[tests/unit/test_openpi_aloha.py](/Users/jaeholee0404/roboarena/tests/unit/test_openpi_aloha.py).
+It injects a `FakeOpenPIAlohaClient` (no GPU, no network) and checks construction,
+protocol conformance, manifest shape, per-arm chunk shapes from the upstream 14-D
+action, and that every fairness-log decision is tagged `official`.
+
+If you need to bridge a single-arm openpi checkpoint onto a bimanual embodiment,
+do **not** extend this adapter — use the single-arm bridge path instead and
+record the static-padding rule explicitly, per §3.4.
+
 ## 3. New Embodiment Adapter
 
 ### 3.1 Gather the embodiment artifacts first
