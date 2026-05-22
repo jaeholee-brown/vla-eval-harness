@@ -1,72 +1,57 @@
-# RoboArena
+# `vla-eval-harness`
 
-![RoboArena teaser](docs/roboarena_teaser.jpeg)
+`vla-eval-harness` is a private fair-inference harness for evaluating frontier vision-language-action policies across robot embodiments.
 
-RoboArena is a distributed, scalable benchmark for generalist robot policies. For more details about RoboArena, please check our [website](https://robo-arena.github.io/).
+The repo starts from a pinned, vendored slice of RoboArena's transport layer and builds the harness around that. It does **not** assume RoboArena already provides a rollout engine, embodiment adapters, or a generalized multi-arm protocol.
 
-This repo contains example code and instructions for:
-(1) serving your policy via a remote policy server, to make it ready for RoboArena evaluation
-(2) evaluating your policies in simulated environments before submitting them for RoboArena eval
-(3) links to openpi VLA starter training code
+## What Is Here
 
+- `vla_harness/_upstream/roboarena/`: pinned upstream transport files from RoboArena commit `a07f93d`
+- `vla_harness/runner/`: current-schema runner and run orchestration
+- `vla_harness/adapters/policy/`: policy adapters, starting with `OpenPI`
+- `vla_harness/adapters/embodiment/`: embodiment adapters, starting with a single-active-arm `DK-1` path
+- `vla_harness/logging/`: structured fairness logs
+- `archive/upstream_roboarena/`: archived upstream docs and non-harness-facing references
 
-## Getting Started
+## Current Status
 
-First, install the required packages for serving a (dummy) policy:
+Implemented now:
+
+- pinned upstream transport vendoring with provenance and notices
+- current-schema gap matrix for `GR00T` and `MolmoAct2`
+- current-schema runner and structured fairness log
+- `OpenPI` current-schema adapter scaffold
+- `DK-1` single-active-arm adapter scaffold
+- unit, fidelity-harness, and hardware-smoke test scaffolding
+
+Not implemented yet:
+
+- real `GR00T` adapter
+- real `MolmoAct2` FastAPI bridge
+- true bimanual internal representation
+- true bimanual `YAM` or `DK-1` protocol support
+
+## Install
+
 ```bash
 uv sync
 uv pip install -e .
 ```
 
-To start a policy server for a dummy policy, run:
+## Run Tests
+
 ```bash
-uv run roboarena/policy_server.py
+pytest tests/unit
+pytest tests/fidelity
+pytest tests/hardware
 ```
 
-To query the policy server, in a separate shell, run:
-```bash
-uv run roboarena/policy_client.py
-```
+The fidelity and hardware suites are intentionally skip-heavy until the required external dependencies, captured frame corpora, and hardware backends are available.
 
+## Upstream Boundary
 
-## Serving Your Policy for RoboArena Evaluation
+- The vendored upstream slice is pinned at RoboArena commit `a07f93d`.
+- `policy_client.py` and `msgpack_numpy.py` in that slice ultimately originate from `openpi` and carry Apache-2.0 notice obligations.
+- Active product code should import from `vla_harness.*`. The top-level `roboarena.*` package remains only as an import shim for the vendored upstream files.
 
-If you have trained a policy and want to serve it as a remote policy server for RoboArena evaluation, make sure
-it matches the interface of the `BasePolicy` class in [`policy.py`](roboarena/policy.py).
-
-Then, create a policy server:
-```python
-from roboarena import policy_server
-policy = YourPolicy()
-config = policy_server.PolicyServerConfig(
-    image_resolution=(224, 224),
-    needs_wrist_camera=True,
-    n_external_cameras=1,
-    needs_stereo_camera=False,
-    action_space="joint_position",
-)
-server = policy_server.WebsocketPolicyServer(policy, config)
-```
-
-The `PolicyServerConfig` is used to tell the client script, what observations the policy expects and what actions it returns. 
-This way, we only send the required information back and forth, minimizing communication latency. 
-Check [`roboarena/policy_server.py`](roboarena/policy_server.py) for all available options.
-
-Once you served your policy, to test it you can run the following in a separate shell:
-```bash
-uv run scripts/test_policy_server.py
-```
-
-
-## Testing Your Policy in Simulation
-
-Before submitting your policy for RoboArena evaluations, we recommend you test it in simulation, to make sure that the behavior is reasonable.
-
-To evaluate your policy in simulation, follow the instructions for serving it on a remote server above. 
-Then, check out the [DROID simulated evaluation repo](https://github.com/arhanjain/sim-evals) and follow the instructions there.
-
-
-## Training VLAs on DROID
-
-RoboArena leverages the DROID platform. For a full example of training a SoTA VLA on the DROID dataset (that is ready for RoboArena eval), 
-please check the DROID training examples in the [`openpi`](https://github.com/Physical-Intelligence/openpi) repo!
+See [archive/upstream_roboarena/README.upstream.md](archive/upstream_roboarena/README.upstream.md) for the original benchmark-facing README.
