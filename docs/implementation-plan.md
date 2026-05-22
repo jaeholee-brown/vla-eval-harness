@@ -139,7 +139,7 @@ This spike already established the critical constraint:
 
 ### Phase 1: current-schema `OpenPI + DK-1`
 
-Status: scaffold complete, fidelity not yet proven.
+Status: scaffold complete and fidelity proven on `OpenPI`; real `DK-1` hardware smoke is still separate work.
 
 What Phase 1 means:
 
@@ -156,7 +156,11 @@ Code already present:
 - `vla_harness/eval/openpi_callables.py`
 - `scripts/fetch_droid_fixtures.py`
 
-Phase 1 is not considered closed yet because Phase 1.5 has not been earned.
+What changed after the GPU run:
+
+- the model-side fidelity gate is closed for `OpenPI`
+- the gating artifact is not just “parity exists,” but “parity exists with explicit stochastic-control plumbing and validated negative controls”
+- phase 2 does not need to wait for a real `DK-1` backend; the next bottleneck is model-side adapter pressure, not embodiment execution
 
 ### Phase 1.5: fidelity gates
 
@@ -214,7 +218,7 @@ Tests involved:
 
 ### Phase 2: runtime spikes and observed pain report
 
-Status: blocked on Phase 1.5.
+Status: ready to begin.
 
 Phase 2 is a spike, not adapter delivery.
 
@@ -275,6 +279,25 @@ Questions this spike must answer:
 Deliverable:
 
 - a section in the observed-pain report dedicated to `MolmoAct2`
+
+#### Priors updated by Phase 1.5
+
+These are now assumptions the next phase should start from:
+
+1. **Stochastic-policy parity needs explicit randomness control.**
+   The `OpenPI` result showed that websocket-vs-inprocess parity is not meaningful for flow-matching policies unless both legs share deterministic per-example noise. For future model spikes, the first question is not just “what is the inference entrypoint?” but also “how do we control randomness across processes?”
+
+2. **Exact preprocessing parity is realistic when the official transform can be reused directly.**
+   `OpenPI` preprocessing parity was byte-identical. That raises the bar for future adapters: if an official preprocessing transform is callable, exact parity should be the target until proven impossible.
+
+3. **Negative controls are mandatory, not nice-to-have.**
+   The fail-on-purpose loops carried real signal. Every future parity or replay battery should include at least one deliberate break path.
+
+4. **Offline recorded fixtures are sufficient for early model-side pressure testing.**
+   Phase 2 does not need live `DK-1` hardware to discover schema and transport pain. The current next risk is model/runtime mismatch, not robot I/O.
+
+5. **Stock serving paths may be insufficient for fidelity work.**
+   `scripts/serve_openpi_for_fidelity.py` exists because the stock `openpi` server could not expose deterministic-noise control. This makes it more likely that `GR00T` and `MolmoAct2` spikes will need similarly small, spike-only runtime wrappers to make apples-to-apples comparisons possible.
 
 #### Phase 2 observed-pain report
 
@@ -416,6 +439,8 @@ A parity battery that cannot detect an intentionally wrong path is not a useful 
 
 Do not start Phase 2 until Phase 1.5 is proven on the GPU machine.
 
+Status update: this rule is satisfied for `OpenPI`.
+
 ### Rule 6: every exit criterion is re-read against the north star
 
 Before declaring any phase complete, re-read its exit criteria with the north star in mind. If a phase's deliverables would not make the next adapter easier to author from upstream artifacts than the previous one was, the phase is not done — even if its code compiles and its tests pass.
@@ -432,16 +457,26 @@ Do this before anything else:
 6. run at least one fail-on-purpose manual check
 7. record the tolerances and outcome
 
-Only after that should you start the `GR00T` and `MolmoAct2` spikes.
+This step is now complete for `OpenPI`, so the next concrete work is the Phase 2 runtime spikes.
 
 The exact commands are already documented in:
 
 - `docs/runbooks/phase-1.5-fidelity.md`
 
+The next spike checklist is documented in:
+
+- `docs/runbooks/phase-2-runtime-spikes.md`
+
 ## Immediate Next Commit After GPU Validation
 
-Assuming Phase 1.5 is proven, the next code/doc change should be:
+After GPU validation, the next work should be:
 
-- add `docs/pain/current-schema-observed-pain.md`
+1. run the `GR00T` managed-local-server spike
+2. run the `MolmoAct2` FastAPI spike
+3. fill `docs/pain/current-schema-observed-pain.md`
+
+One additional test is recommended but not gating for Phase 2:
+
+- run the real `DK-1` dry-run / bounded-motion smoke once the hardware backend is wired, because the current embodiment tests are still placeholders
 
 That report should be committed before any internal-representation code is written.

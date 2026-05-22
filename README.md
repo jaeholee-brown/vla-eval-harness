@@ -24,6 +24,7 @@ Implemented now:
 - `DK-1` single-active-arm adapter scaffold
 - unit, fidelity-harness, and hardware-smoke test scaffolding
 - phase-1.5 fidelity guards for preprocessing claims and configurable action-parity tolerances
+- phase-1.5 fidelity closure against live `pi05_droid`
 
 Not implemented yet:
 
@@ -49,18 +50,21 @@ pytest tests/hardware
 
 The fidelity and hardware suites are intentionally skip-heavy until the required external dependencies, captured frame corpora, and hardware backends are available.
 
-## Phase 2 Entry Gate
+## Phase 2 Status
 
-Do not start the `GR00T` / `MolmoAct2` runtime spike until all three of these are true for `OpenPI + DK-1`:
+Phase 1.5 has been earned on GPU, so Phase 2 is now unblocked.
 
-1. preprocessing parity is wired to the real official preprocessing path
-2. action parity passes on captured fixtures with configured `atol` / `rtol`
-3. a negative-control action test proves the parity battery can detect a deliberately wrong path
+Phase 2 is a spike, not full adapter implementation. Its output should be:
 
-Phase 2 is a spike, not full adapter implementation. Its output should be an observed-pain report in `docs/pain/`.
+- one `GR00T` managed-local-server runtime spike
+- one official `MolmoAct2` FastAPI runtime spike
+- one observed-pain report in `docs/pain/current-schema-observed-pain.md`
 
 Step-by-step instructions for running the three gating tests are in
 [docs/runbooks/phase-1.5-fidelity.md](docs/runbooks/phase-1.5-fidelity.md).
+
+Step-by-step instructions for the runtime spikes are in
+[docs/runbooks/phase-2-runtime-spikes.md](docs/runbooks/phase-2-runtime-spikes.md).
 
 The full implementation plan and phase ordering are in
 [docs/implementation-plan.md](docs/implementation-plan.md).
