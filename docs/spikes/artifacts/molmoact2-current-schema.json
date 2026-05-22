@@ -1,0 +1,87 @@
+{
+  "droid_server": {
+    "default_num_steps": 10,
+    "health_body": {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "norm_tag": "franka_droid",
+      "repo_id": "allenai/MolmoAct2-DROID",
+      "status": "ok"
+    },
+    "health_status_code": 200,
+    "mapped_current_schema_response_keys": [
+      "actions",
+      "dt_ms"
+    ],
+    "mapped_current_schema_status_code": 200,
+    "norm_tag": "franka_droid",
+    "raw_current_schema_error": "missing required field: 'external_cam'",
+    "raw_current_schema_status_code": 400,
+    "repo_id": "allenai/MolmoAct2-DROID"
+  },
+  "fit_analysis": {
+    "droid": {
+      "adapter_local_choices": [
+        "drop cartesian_position because the official server does not consume it",
+        "speak HTTP+json_numpy instead of websocket+msgpack"
+      ],
+      "easy_mappings": [
+        "exterior_image_1_left -> external_cam",
+        "wrist_image_left -> wrist_cam",
+        "prompt -> instruction",
+        "concat(joint_position, gripper_position) -> state(8)"
+      ],
+      "rename_only": false
+    },
+    "yam": {
+      "checkpoint_specific_runtime_branching": [
+        "DROID server calls predict_action(..., action_mode='continuous')",
+        "YAM server calls predict_action(..., inference_action_mode='continuous')"
+      ],
+      "dishonest_mapping_required_for_current_schema": [
+        "invent a top/left/right camera role mapping from wrist/exterior cameras",
+        "duplicate or pad camera streams",
+        "pad or synthesize the missing 7-D arm state"
+      ],
+      "hard_mismatches": [
+        "official server requires three named cameras in fixed order [top, left, right]",
+        "official server requires state(14,) for two 7-D arms",
+        "current flat schema only carries one arm plus one wrist and one exterior camera"
+      ],
+      "rename_only": false
+    }
+  },
+  "phase2_failures": [
+    "transport mismatch: MolmoAct2 official deployment is HTTP+json_numpy, not websocket",
+    "schema mismatch: YAM requires true bimanual state and three ordered cameras",
+    "runtime mismatch: per-checkpoint server code differs at the predict_action call signature",
+    "fairness-metadata gap: norm_tag and camera order are official deployment defaults that the current fairness log cannot name explicitly"
+  ],
+  "source": {
+    "commit": "804ba37",
+    "repo_root": "/tmp/vla_sources/molmoact2"
+  },
+  "yam_server": {
+    "health_body": {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "norm_tag": "yam_dual_molmoact2",
+      "num_cameras": 3,
+      "repo_id": "allenai/MolmoAct2-BimanualYAM",
+      "state_dim": 14,
+      "status": "ok"
+    },
+    "health_status_code": 200,
+    "norm_tag": "yam_dual_molmoact2",
+    "num_cameras": 3,
+    "official_payload_response_keys": [
+      "actions",
+      "dt_ms"
+    ],
+    "official_payload_status_code": 200,
+    "raw_current_schema_error": "missing required field: 'top_cam'",
+    "raw_current_schema_status_code": 400,
+    "repo_id": "allenai/MolmoAct2-BimanualYAM",
+    "state_dim": 14
+  }
+}

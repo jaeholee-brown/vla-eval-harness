@@ -1,0 +1,113 @@
+{
+  "current_flat_schema": {
+    "action_enum": [
+      "joint_position",
+      "joint_velocity",
+      "cartesian_position",
+      "cartesian_velocity"
+    ],
+    "state_keys": [
+      "observation/joint_position",
+      "observation/cartesian_position",
+      "observation/gripper_position"
+    ],
+    "video_keys": [
+      "observation/exterior_image_1_left",
+      "observation/wrist_image_left"
+    ]
+  },
+  "fit_analysis": {
+    "action": {
+      "hard_mismatch": "Current flat schema exposes a single 7D/8D chunk plus one action_space enum; GR00T DROID expects 17D over named streams with mixed relative/absolute semantics and 40-step horizon",
+      "mixed_action_representations": [
+        "relative",
+        "absolute",
+        "relative"
+      ],
+      "rename_only": false,
+      "required_decisions": [
+        "preserve per-stream semantics instead of flattening into one current-schema action array",
+        "encode relative EEF, absolute gripper, and relative joint semantics explicitly"
+      ],
+      "required_horizon": 40,
+      "required_keys": [
+        "eef_9d",
+        "gripper_position",
+        "joint_position"
+      ]
+    },
+    "language": {
+      "available_key": "prompt",
+      "rename_only": true,
+      "required_key": "annotation.language.language_instruction"
+    },
+    "state": {
+      "available_keys": [
+        "observation/cartesian_position",
+        "observation/gripper_position",
+        "observation/joint_position"
+      ],
+      "hard_mismatch": "GR00T expects eef_9d (9D), but the current flat schema only exposes cartesian_position(6) with no embedded rotation-6D convention",
+      "rename_only": false,
+      "required_decisions": [
+        "derive eef_9d from cartesian_position(6) using an explicit pose convention and rotation conversion",
+        "keep gripper_position and joint_position as separate named state streams instead of one flat vector"
+      ],
+      "required_keys": [
+        "eef_9d",
+        "gripper_position",
+        "joint_position"
+      ]
+    },
+    "video": {
+      "available_keys": [
+        "observation/exterior_image_1_left",
+        "observation/wrist_image_left"
+      ],
+      "current_horizon": 1,
+      "rename_only": false,
+      "required_decisions": [
+        "duplicate or buffer frames to satisfy GR00T video horizon 2 from a single current-schema frame",
+        "rename flat keys into nested modality names"
+      ],
+      "required_horizon": 2,
+      "required_keys": [
+        "exterior_image_1_left",
+        "wrist_image_left"
+      ]
+    }
+  },
+  "phase2_failures": [
+    "transport mismatch: GR00T official server is ZeroMQ REQ/REP, not websocket",
+    "payload mismatch: official observation is nested by modality with explicit temporal horizons",
+    "semantic mismatch: current flat action enum cannot represent mixed relative/absolute action streams",
+    "state mismatch: eef_9d is not present in the current flat schema and requires a benchmark-side derivation rule"
+  ],
+  "source": {
+    "commit": "3df8b38",
+    "embodiment_tag": "oxe_droid_relative_eef_relative_joint",
+    "repo_root": "/tmp/vla_sources/Isaac-GR00T"
+  },
+  "transport_probe": {
+    "official_action_horizon": 40,
+    "official_action_keys": [
+      "eef_9d",
+      "gripper_position",
+      "joint_position"
+    ],
+    "official_state_horizon": 1,
+    "official_state_keys": [
+      "eef_9d",
+      "gripper_position",
+      "joint_position"
+    ],
+    "official_video_horizon": 2,
+    "official_video_keys": [
+      "exterior_image_1_left",
+      "wrist_image_left"
+    ],
+    "protocol": "zmq+msgpack_numpy",
+    "reset_ok": true,
+    "roundtrip_ok": true
+  }
+}
