@@ -12,6 +12,32 @@ It is intentionally concrete. It describes:
 
 The plan is based on the actual code in this repo, not on an abstract future architecture.
 
+## North Star
+
+The harness exists so that adding a new VLA or a new robot is a templated translation job, not a design job.
+
+Concretely:
+
+> If I want to add a new arm and a new VLA, I can get a coding agent to easily code up an embodiment adapter and a VLA adapter. It should be easy for the agent to look at the existing published "default settings" or published code that came when the model or arm released, and port those into templates of existing adapters. The agent should have to make minimal decisions.
+
+This is the test every phase exit criterion is judged against. A phase is done not just when its code works, but when the resulting contract makes the next adapter easier to author from official upstream artifacts than the previous one was.
+
+### What that requires the harness to provide
+
+- a small, stable contract per adapter type, small enough to fit in one LLM context
+- a contract honest enough to carry diverse policies and embodiments without silent flattening
+- an automatic fairness ledger that the adapter declares as part of its contract
+- templated verification (parity callables + recorded-trajectory replay) so each new adapter can be smoke-tested without hardware
+- a documented mapping from common upstream artifact shapes (websocket server, FastAPI server, in-process Python entrypoint, HuggingFace policy server, managed-local-server) to harness adapter slots
+
+### Authoring invariants any future schema change must hold
+
+- policy adapter Protocol stays around 5–7 methods
+- embodiment adapter Protocol stays around 5–7 methods
+- every fairness-relevant decision is a typed dataclass field, never a free-form string
+- every adapter type has a runnable skeleton file the agent can copy and fill in
+- every adapter type has at least two reference implementations before its contract is declared stable, so agents triangulate the pattern instead of overfitting to one example
+
 ## Goals
 
 Primary goals:
@@ -283,12 +309,25 @@ Initial files to add once Phase 3 begins:
 - `vla_harness/protocol/observation.py`
 - `vla_harness/protocol/action.py`
 
+Authoring-goal deliverables (non-optional — Phase 3 does not exit without these):
+
+- runnable policy-adapter skeleton at `vla_harness/adapters/policy/_skeleton.py`, with inline comments marking every spot the author must decide something
+- runnable embodiment-adapter skeleton at `vla_harness/adapters/embodiment/_skeleton.py`
+- runnable parity-callables skeleton at `vla_harness/eval/_skeleton.py`
+- first draft of `docs/cookbook/adapter-authoring.md` with sections:
+  - "How to add a new VLA"
+  - "How to add a new embodiment"
+  - "Mapping common upstream artifact shapes" (websocket server, FastAPI server, in-process Python entrypoint, HuggingFace policy server, managed-local-server)
+- every field in the internal representation has a one-line note on where in a typical upstream artifact an agent would find the value to put there
+
 Phase 3 exit criteria:
 
 - the internal representation covers every concrete blocker named in the observed-pain report
 - `OpenPI + DK-1` can be migrated without losing parity
 - the model can represent true bimanual state/action groupings honestly
 - transport remains separable from payload
+- the three skeletons exist and are imported by at least one real adapter as a sanity check
+- the cookbook first draft is complete
 
 ### Phase 4: full adapters on the internal representation
 
@@ -307,6 +346,29 @@ Rules:
 - all adapters must continue emitting structured fairness metadata plus free-form notes
 
 Phase 4 is when the harness earns the right to say it supports more than the current bootstrap path.
+
+Authoring-goal deliverables for Phase 4:
+
+- after each adapter ships, the cookbook gains a worked example section showing the exact upstream-artifact → harness-field mapping for that adapter
+- the cookbook gains a "Mapping common upstream artifact shapes" appendix with one concrete example per shape category, drawn from the four real adapters now in tree
+
+### Phase 4 exit gate — the authoring claim
+
+Phase 4 is not done when `GR00T`, `MolmoAct2`, and `YAM` all work. It is done when an outside contributor — or a coding agent working from the cookbook alone, with no live design help from the harness maintainer — can author a fifth adapter against an unlisted upstream policy or embodiment, using only:
+
+- the cookbook
+- the skeletons
+- the four reference adapters
+- the upstream artifact's own documentation
+
+The fifth adapter does not have to be production-grade. It must:
+
+- compile against the Protocols
+- emit a complete fairness log
+- pass its own parity gates
+- have been authored without the harness maintainer rewriting it
+
+This is the test that proves the harness has earned its authoring claim. Until this passes, Phase 4 is not closed.
 
 ## Fairness Rules
 
@@ -337,6 +399,10 @@ A parity battery that cannot detect an intentionally wrong path is not a useful 
 ### Rule 5: no phase skipping
 
 Do not start Phase 2 until Phase 1.5 is proven on the GPU machine.
+
+### Rule 6: every exit criterion is re-read against the north star
+
+Before declaring any phase complete, re-read its exit criteria with the north star in mind. If a phase's deliverables would not make the next adapter easier to author from upstream artifacts than the previous one was, the phase is not done — even if its code compiles and its tests pass.
 
 ## What To Do On The GPU Machine
 
