@@ -66,15 +66,23 @@ Implemented and checked in:
 - structured fairness log with tolerance fields
 - `OpenPI` current-schema adapter
 - `DK-1` single-active-arm adapter
-- `OpenPI` parity callables
+- `OpenPI` parity callables (with deterministic per-fixture noise so the
+  flow-matching action parity test is meaningful)
 - DROID fixture fetcher
+- harness-side noise-aware openpi fidelity server (`scripts/serve_openpi_for_fidelity.py`)
 - phase-1.5 fidelity runbook
 - phase-1.5 guard that refuses benchmark runs if fairness metadata claims official preprocessing but the adapter is still using the identity preprocessor
 
 Implemented but intentionally incomplete:
 
-- fidelity tests are present, but still skip until the required environment variables, fixture corpora, `openpi` runtime, and hardware are available
 - hardware tests are placeholders until the real `DK-1` backend is wired
+
+Closed on a GPU (no longer "incomplete"):
+
+- fidelity tests (preprocessing parity, action parity, negative control)
+  pass against a live pi05_droid runtime when the env vars in
+  `docs/runbooks/phase-1.5-fidelity.md` are sourced; the recorded
+  tolerances live in that runbook
 
 Not implemented yet:
 
@@ -152,9 +160,10 @@ Phase 1 is not considered closed yet because Phase 1.5 has not been earned.
 
 ### Phase 1.5: fidelity gates
 
-Status: harness and tests are present; real evidence is still missing.
+Status: closed 2026-05-22 on a single RTX 5090 with pi05_droid.
 
-This is the current top priority.
+All three tests pass with the tolerances logged in the runbook; both
+fail-on-purpose loops were observed to fail as expected.
 
 The gate is strict: **do not start Phase 2 until all three of these are complete**.
 
@@ -185,6 +194,13 @@ Evidence required to close Phase 1.5:
 - negative control passes
 - at least one fail-on-purpose manual check was performed and observed to fail
 - the tolerances that were required to pass are recorded in the fairness log metadata
+
+Earned tolerances (2026-05-22 RTX 5090, pi05_droid, 5 DROID fixtures):
+
+- preprocessing parity: `atol=0.0, rtol=0.0` (byte-identical, both callables route through `_run_image_through_official_transforms`)
+- action parity: `atol=2e-2, rtol=2e-2` with deterministic per-fixture noise piped through `scripts/serve_openpi_for_fidelity.py`; steady-state max abs diff was 3.3e-3, worst cold-cache excursion was 1.12e-2 (cuDNN auto-tuner divergence between two independent JAX processes — verified stable across 8 suite-mode repeats at 2e-2)
+- negative control: `min_abs_diff=1e-4` separated cleanly on all three of `swap_rgb`, `zero_image`, `shuffle_prompt`
+- preprocess fail-on-purpose: pointing `OPENPI_HARNESS_PREPROCESS` at the identity callable failed the parity test (shape mismatch 180×320 vs 224×224)
 
 Runbook:
 

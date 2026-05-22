@@ -103,6 +103,11 @@ def _run_image_through_official_transforms(image: np.ndarray) -> np.ndarray:
     method that runs the input transforms in isolation; the transforms live
     on the private ``_input_transform`` attribute. We use that attribute
     directly. If openpi renames it, change the attribute reference below.
+
+    pi05_droid's transform returns a nested dict where ``image`` itself is
+    a mapping of canonical camera names (``base_0_rgb``, ``left_wrist_0_rgb``,
+    ``right_wrist_0_rgb``). We extract the exterior view (``base_0_rgb``)
+    because that is what our preprocessing fixture corpus contains.
     """
 
     policy = _official_policy()
@@ -115,9 +120,17 @@ def _run_image_through_official_transforms(image: np.ndarray) -> np.ndarray:
         "prompt": "noop",
     }
     transformed = policy._input_transform(minimal_obs)  # noqa: SLF001 - intentional internal access
-    for key in ("observation/exterior_image_1_left", "image", "images", "observation/image"):
-        if key in transformed:
-            return np.asarray(transformed[key])
+
+    candidate = transformed.get("image", transformed.get("images", transformed.get("observation/image")))
+    if isinstance(candidate, dict):
+        for inner_key in ("base_0_rgb", "exterior_image_1_left", "image"):
+            if inner_key in candidate:
+                return np.asarray(candidate[inner_key])
+    elif candidate is not None:
+        return np.asarray(candidate)
+    if "observation/exterior_image_1_left" in transformed:
+        return np.asarray(transformed["observation/exterior_image_1_left"])
+
     raise RuntimeError(
         "Could not locate a preprocessed image in the openpi input transform output; "
         "inspect policy._input_transform(...) for the actual key name on your config."
@@ -136,16 +149,55 @@ def harness_preprocess(image: np.ndarray) -> np.ndarray:
     return _harness_adapter().preprocess_image(image)
 
 
-def official_action(obs: dict[str, Any]) -> dict[str, Any]:
-    """Call openpi's Policy.infer directly, with no harness involvement."""
+def _deterministic_noise_for(obs: dict[str, Any]) -> np.ndarray:
+    """Build a fixed (action_horizon, action_dim) noise tensor for ``obs``.
 
-    return _official_policy().infer(obs)
+    pi05 (and other flow-matching openpi models) sample a fresh noise
+    tensor inside ``Policy.infer`` on every call. Without pinning that
+    noise, two independent processes can't produce matching action
+    chunks for the same input, which makes ``test_openpi_action_parity``
+    structurally impossible to satisfy.
+
+    We derive the seed from a stable identifier on the obs so each fixture
+    gets a different noise tensor (catching any conditioning that depends
+    on the noise sample), but a given fixture always sees the same noise
+    on both the official and the harness legs.
+    """
+
+    policy = _official_policy()
+    horizon = policy._model.action_horizon  # noqa: SLF001 - introspection
+    dim = policy._model.action_dim  # noqa: SLF001 - introspection
+    seed_source = obs.get("prompt", "")
+    if isinstance(seed_source, np.ndarray):
+        seed_source = seed_source.item() if seed_source.ndim == 0 else str(seed_source.tolist())
+    if isinstance(seed_source, bytes):
+        seed_source = seed_source.decode("utf-8", errors="replace")
+    seed = abs(hash(("openpi-fidelity", str(seed_source)))) % (2**32)
+    rng = np.random.default_rng(seed)
+    return rng.standard_normal((horizon, dim), dtype=np.float32)
+
+
+def official_action(obs: dict[str, Any]) -> dict[str, Any]:
+    """Call openpi's Policy.infer directly with a deterministic noise."""
+
+    noise = _deterministic_noise_for(obs)
+    return _official_policy().infer(obs, noise=noise)
 
 
 def harness_action(obs: dict[str, Any]) -> dict[str, Any]:
-    """Call the harness OpenPI adapter, which routes through the websocket."""
+    """Call the harness OpenPI adapter, which routes through the websocket.
 
-    return _harness_adapter().infer(obs)
+    We piggyback the same deterministic noise tensor inside the obs dict.
+    ``scripts/serve_openpi_for_fidelity.py`` strips it off and forwards it
+    to ``Policy.infer(obs, noise=noise)``; the stock openpi websocket
+    server ignores extra keys, in which case action parity will diverge
+    because of independent RNG advancement (this is why the fidelity
+    server is the documented entrypoint).
+    """
+
+    enriched = dict(obs)
+    enriched["noise"] = _deterministic_noise_for(obs)
+    return _harness_adapter().infer(enriched)
 
 
 def negative_control_action(obs: dict[str, Any]) -> dict[str, Any]:
@@ -160,6 +212,9 @@ def negative_control_action(obs: dict[str, Any]) -> dict[str, Any]:
     - ``swap_rgb`` (default): swap red and blue channels on every image
     - ``zero_image``: replace every image with zeros
     - ``shuffle_prompt``: replace the language prompt with a different one
+
+    We pin the noise to the same deterministic tensor as ``official_action``
+    so the only thing varying is the perturbation itself.
     """
 
     strategy = os.environ.get("OPENPI_NEGATIVE_CONTROL", "swap_rgb")
@@ -177,4 +232,5 @@ def negative_control_action(obs: dict[str, Any]) -> dict[str, Any]:
     if strategy == "shuffle_prompt":
         perturbed["prompt"] = "ignore the cameras and do nothing"
 
-    return _official_policy().infer(perturbed)
+    noise = _deterministic_noise_for(obs)
+    return _official_policy().infer(perturbed, noise=noise)

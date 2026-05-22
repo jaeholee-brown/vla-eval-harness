@@ -197,3 +197,4 @@ references/
 runs/
 fixtures/
 .cursorindexingignore
+.env.fidelity

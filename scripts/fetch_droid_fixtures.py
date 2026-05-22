@@ -34,14 +34,17 @@ DEFAULT_OUTPUT_DIR = Path("fixtures")
 
 def _ensure_lerobot() -> Any:
     try:
-        from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
-    except ImportError as exc:  # pragma: no cover - import guard
-        print(
-            "lerobot is not installed. Install it with `uv pip install lerobot` "
-            "(or `pip install lerobot`) and re-run.",
-            file=sys.stderr,
-        )
-        raise SystemExit(1) from exc
+        from lerobot.datasets.lerobot_dataset import LeRobotDataset
+    except ImportError:
+        try:
+            from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+        except ImportError as exc:  # pragma: no cover - import guard
+            print(
+                "lerobot is not installed. Install it with `uv pip install lerobot` "
+                "(or `pip install lerobot`) and re-run.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from exc
     return LeRobotDataset
 
 
