@@ -62,6 +62,9 @@ Phase 2 is a spike, not full adapter implementation. Its output should be an obs
 Step-by-step instructions for running the three gating tests are in
 [docs/runbooks/phase-1.5-fidelity.md](docs/runbooks/phase-1.5-fidelity.md).
 
+The full implementation plan and phase ordering are in
+[docs/implementation-plan.md](docs/implementation-plan.md).
+
 ## Upstream Boundary
 
 - The vendored upstream slice is pinned at RoboArena commit `a07f93d`.
