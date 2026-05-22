@@ -11,6 +11,9 @@ from vla_harness.logging.decision_log import ValidationMetadata
 
 
 class CurrentSchemaPolicyAdapter(Protocol):
+    def assert_ready_for_benchmark(self) -> None:
+        """Fail fast if the adapter's fidelity claims are not actually wired."""
+
     def get_server_metadata(self) -> dict[str, Any]:
         """Return the flat-schema metadata advertised by the runtime."""
 

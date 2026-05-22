@@ -67,7 +67,11 @@ class RuntimeMetadata:
 @dataclasses.dataclass(slots=True)
 class ValidationMetadata:
     preprocessing_oracle: str | None = None
+    preprocessing_allowed_atol: float | None = None
+    preprocessing_allowed_rtol: float | None = None
     action_oracle: str | None = None
+    action_allowed_atol: float | None = None
+    action_allowed_rtol: float | None = None
     max_abs_diff: float | None = None
     max_rel_diff: float | None = None
     passed: bool | None = None

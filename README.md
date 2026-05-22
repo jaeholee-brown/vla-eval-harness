@@ -23,6 +23,7 @@ Implemented now:
 - `OpenPI` current-schema adapter scaffold
 - `DK-1` single-active-arm adapter scaffold
 - unit, fidelity-harness, and hardware-smoke test scaffolding
+- phase-1.5 fidelity guards for preprocessing claims and configurable action-parity tolerances
 
 Not implemented yet:
 
@@ -47,6 +48,16 @@ pytest tests/hardware
 ```
 
 The fidelity and hardware suites are intentionally skip-heavy until the required external dependencies, captured frame corpora, and hardware backends are available.
+
+## Phase 2 Entry Gate
+
+Do not start the `GR00T` / `MolmoAct2` runtime spike until all three of these are true for `OpenPI + DK-1`:
+
+1. preprocessing parity is wired to the real official preprocessing path
+2. action parity passes on captured fixtures with configured `atol` / `rtol`
+3. a negative-control action test proves the parity battery can detect a deliberately wrong path
+
+Phase 2 is a spike, not full adapter implementation. Its output should be an observed-pain report in `docs/pain/`.
 
 ## Upstream Boundary
 

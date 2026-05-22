@@ -49,15 +49,19 @@ class OpenPIRuntimeConfig:
     chunk_size: int | None = None
     prompt_format_source: str | None = "official_openpi_runtime"
     image_resize_resolution: tuple[int, int] | None = (224, 224)
-    image_resize_filter: str | None = "official_openpi_runtime"
-    image_color_space: str | None = "rgb"
-    image_output_dtype: str | None = "uint8"
+    image_resize_filter: str | None = "unconfigured"
+    image_color_space: str | None = "unconfigured"
+    image_output_dtype: str | None = "unconfigured"
     server_command: Sequence[str] | None = None
     startup_timeout_s: float = 20.0
     startup_poll_interval_s: float = 0.25
     env: Mapping[str, str] | None = None
     preprocessing_oracle_name: str | None = None
     action_oracle_name: str | None = None
+    preprocessing_allowed_atol: float | None = None
+    preprocessing_allowed_rtol: float | None = None
+    action_allowed_atol: float | None = None
+    action_allowed_rtol: float | None = None
 
 
 class OpenPICurrentSchemaAdapter(CurrentSchemaPolicyAdapter):
@@ -77,6 +81,24 @@ class OpenPICurrentSchemaAdapter(CurrentSchemaPolicyAdapter):
         self._oracle_callable = oracle_callable
         self._client: WebsocketClientPolicy | None = None
         self._server_process: subprocess.Popen[str] | None = None
+
+    def _claims_official_preprocessing(self) -> bool:
+        return any(
+            value == "official_openpi_runtime"
+            for value in (
+                self._config.image_resize_filter,
+                self._config.image_color_space,
+                self._config.image_output_dtype,
+            )
+        )
+
+    def assert_ready_for_benchmark(self) -> None:
+        if self._claims_official_preprocessing() and self._preprocess_callable is identity_preprocess:
+            raise RuntimeError(
+                "OpenPI adapter claims official preprocessing in fairness metadata, but no explicit "
+                "preprocess callable was wired. Set the preprocessing metadata to a non-official value "
+                "or provide the official preprocessing callable before any benchmark run."
+            )
 
     def _spawn_server_if_needed(self) -> None:
         if self._server_process is not None or self._config.server_command is None:
@@ -151,7 +173,11 @@ class OpenPICurrentSchemaAdapter(CurrentSchemaPolicyAdapter):
     def build_validation_metadata(self) -> ValidationMetadata:
         return ValidationMetadata(
             preprocessing_oracle=self._config.preprocessing_oracle_name,
+            preprocessing_allowed_atol=self._config.preprocessing_allowed_atol,
+            preprocessing_allowed_rtol=self._config.preprocessing_allowed_rtol,
             action_oracle=self._config.action_oracle_name,
+            action_allowed_atol=self._config.action_allowed_atol,
+            action_allowed_rtol=self._config.action_allowed_rtol,
         )
 
     def build_notes(self) -> list[DecisionNote]:
@@ -170,6 +196,13 @@ class OpenPICurrentSchemaAdapter(CurrentSchemaPolicyAdapter):
                 status="scoped_out",
                 rationale="Phase 1 intentionally targets only the current flat schema bootstrap path.",
                 evidence="docs/spikes/current-schema-gap-matrix.md",
+            ),
+            DecisionNote(
+                topic="policy.preprocessing_claim",
+                choice=self._config.image_resize_filter or "unset",
+                status="official" if self._claims_official_preprocessing() else "adapter",
+                rationale="Fairness metadata must match the preprocessing path that is actually wired.",
+                evidence="vla_harness/adapters/policy/openpi_current_schema.py",
             ),
         ]
 

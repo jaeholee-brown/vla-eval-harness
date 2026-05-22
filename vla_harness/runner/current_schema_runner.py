@@ -54,6 +54,7 @@ class CurrentSchemaRunner:
 
         self._run_in_progress = True
         try:
+            self._policy.assert_ready_for_benchmark()
             server_metadata = self._policy.get_server_metadata()
             self._embodiment.prepare_episode(server_metadata, config.prompt)
 

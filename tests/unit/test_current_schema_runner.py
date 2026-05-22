@@ -17,6 +17,10 @@ from vla_harness.runner.current_schema_runner import CurrentSchemaRunner
 class FakePolicyAdapter:
     def __init__(self) -> None:
         self.reset_payloads: list[dict[str, object]] = []
+        self.ready_calls = 0
+
+    def assert_ready_for_benchmark(self) -> None:
+        self.ready_calls += 1
 
     def get_server_metadata(self) -> dict[str, object]:
         return {
@@ -115,6 +119,7 @@ def test_current_schema_runner_writes_log_and_calls_reset(tmp_path):
     )
 
     assert result.log_path.exists()
+    assert policy.ready_calls == 1
     assert policy.reset_payloads == [{"session_id": "session-1"}]
     assert len(embodiment.executed) == 1
 
