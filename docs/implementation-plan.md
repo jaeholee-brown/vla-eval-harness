@@ -72,6 +72,10 @@ Implemented and checked in:
 - harness-side noise-aware openpi fidelity server (`scripts/serve_openpi_for_fidelity.py`)
 - phase-1.5 fidelity runbook
 - phase-1.5 guard that refuses benchmark runs if fairness metadata claims official preprocessing but the adapter is still using the identity preprocessor
+- phase-2 source-backed runtime probes for `GR00T` and `MolmoAct2`
+- phase-2 observed-pain report
+- phase-2 JSON artifacts under `docs/spikes/artifacts/`
+- phase-2 upstream-default source map in `docs/spikes/upstream-default-source-map.md`
 
 Implemented but intentionally incomplete:
 
@@ -86,9 +90,6 @@ Closed on a GPU (no longer "incomplete"):
 
 Not implemented yet:
 
-- real `GR00T` runtime spike
-- real `MolmoAct2` runtime spike
-- observed-pain report from those spikes
 - internal representation
 - true-bimanual embodiment support
 
@@ -218,7 +219,7 @@ Tests involved:
 
 ### Phase 2: runtime spikes and observed pain report
 
-Status: ready to begin.
+Status: complete.
 
 Phase 2 is a spike, not adapter delivery.
 
@@ -299,11 +300,39 @@ These are now assumptions the next phase should start from:
 5. **Stock serving paths may be insufficient for fidelity work.**
    `scripts/serve_openpi_for_fidelity.py` exists because the stock `openpi` server could not expose deterministic-noise control. This makes it more likely that `GR00T` and `MolmoAct2` spikes will need similarly small, spike-only runtime wrappers to make apples-to-apples comparisons possible.
 
+#### What Phase 2 actually ran
+
+- `scripts/spike_gr00t_current_schema.py`
+  - official source root: `/tmp/vla_sources/Isaac-GR00T`
+  - commit: `3df8b38`
+  - exercised the official DROID modality config and the official ZeroMQ `PolicyServer` / `PolicyClient`
+  - wrote `docs/spikes/artifacts/gr00t-current-schema.json`
+- `scripts/spike_molmoact2_current_schema.py`
+  - official source root: `/tmp/vla_sources/molmoact2`
+  - commit: `804ba37`
+  - exercised the official DROID and YAM FastAPI apps through `build_app(...)` and `TestClient`
+  - wrote `docs/spikes/artifacts/molmoact2-current-schema.json`
+
+#### Phase 2 outcomes
+
+- `GR00T` pressure is real:
+  - nested modality payloads
+  - explicit temporal horizons
+  - `eef_9d` state
+  - mixed relative/absolute multi-stream action semantics
+  - ZeroMQ transport instead of websocket
+- `MolmoAct2` splits into two very different cases:
+  - DROID is bridgeable with a fairly honest current-schema mapping
+  - YAM is not honest under the current flat schema and proves true-bimanual structure must be first-class
+- the pain report is now specific enough to justify Phase 3
+- the source map is now specific enough to tell a future agent where to copy defaults from upstream code instead of inventing harness-local values
+
 #### Phase 2 observed-pain report
 
 File to write:
 
 - `docs/pain/current-schema-observed-pain.md`
+- `docs/spikes/upstream-default-source-map.md`
 
 Required sections:
 
@@ -322,9 +351,12 @@ Phase 2 exit criteria:
 - the report is based on real runtime experience, not only paper reasoning
 - the report is specific enough that Phase 3 can be written as implementation work, not fresh exploration
 
+Status update: satisfied. The report is in `docs/pain/current-schema-observed-pain.md`.
+The source map is in `docs/spikes/upstream-default-source-map.md`.
+
 ### Phase 3: harness internal representation
 
-Status: not started and should remain not started until Phase 2 closes.
+Status: ready to begin.
 
 Important naming rule:
 
@@ -341,6 +373,7 @@ Required properties:
 - no universal assumption that history is encoded in tensor rank
 - no universal assumption that stereo is always separate streams or always channels
 - migration path from the current flat schema
+- every structured field is either directly copyable from upstream artifacts or explicitly marked as a benchmark-derived projection rule
 
 Initial files to add once Phase 3 begins:
 
@@ -358,6 +391,7 @@ Authoring-goal deliverables (non-optional — Phase 3 does not exit without thes
   - "How to add a new embodiment"
   - "Mapping common upstream artifact shapes" (websocket server, FastAPI server, in-process Python entrypoint, HuggingFace policy server, managed-local-server)
 - every field in the internal representation has a one-line note on where in a typical upstream artifact an agent would find the value to put there
+- every template field is tagged as `copy_from_upstream` or `benchmark_derived`
 
 Phase 3 exit criteria:
 
@@ -367,6 +401,13 @@ Phase 3 exit criteria:
 - transport remains separable from payload
 - the three skeletons exist and are imported by at least one real adapter as a sanity check
 - the cookbook first draft is complete
+
+Recommended first implementation order inside Phase 3:
+
+1. define typed dataclasses for stream names, stream sampling, stream semantics, and arm grouping
+2. migrate `OpenPI + DK-1` through the new representation without changing its already-earned parity behavior
+3. encode the direct-copy fields identified in `docs/spikes/upstream-default-source-map.md`
+4. only then add the benchmark-derived projection hooks needed for GR00T and MolmoAct2 bridge cases
 
 ### Phase 4: full adapters on the internal representation
 
@@ -471,9 +512,9 @@ The next spike checklist is documented in:
 
 After GPU validation, the next work should be:
 
-1. run the `GR00T` managed-local-server spike
-2. run the `MolmoAct2` FastAPI spike
-3. fill `docs/pain/current-schema-observed-pain.md`
+1. define the internal representation using the concrete failures in `docs/pain/current-schema-observed-pain.md`
+2. add the migration layer from the current flat schema
+3. start the adapter / cookbook skeleton work required by the authoring north star
 
 One additional test is recommended but not gating for Phase 2:
 

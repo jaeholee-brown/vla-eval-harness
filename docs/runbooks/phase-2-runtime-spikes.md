@@ -9,6 +9,7 @@ Outputs:
 - one `GR00T` runtime spike
 - one `MolmoAct2` runtime spike
 - one observed-pain report in `docs/pain/current-schema-observed-pain.md`
+- one upstream-default source map in `docs/spikes/upstream-default-source-map.md`
 
 This phase is explicitly **not** for shipping polished adapters.
 
@@ -101,3 +102,70 @@ Phase 2 is not done when:
 - a server launches successfully
 - a shallow wrapper exists
 - a speculative Phase 3 design has been drafted without real pain notes
+
+## Concrete Commands Used
+
+The probes in this repo were run against official source trees checked out under
+`/tmp/vla_sources/`.
+
+### 1. Clone official source trees
+
+```bash
+mkdir -p /tmp/vla_sources
+git clone https://github.com/NVIDIA/Isaac-GR00T /tmp/vla_sources/Isaac-GR00T
+git -C /tmp/vla_sources/Isaac-GR00T checkout 3df8b38
+
+git clone https://github.com/allenai/molmoact2 /tmp/vla_sources/molmoact2
+git -C /tmp/vla_sources/molmoact2 checkout 804ba37
+```
+
+### 2. Run the GR00T probe
+
+```bash
+python3 scripts/spike_gr00t_current_schema.py \
+  --gr00t-repo-root /tmp/vla_sources/Isaac-GR00T \
+  --write-json docs/spikes/artifacts/gr00t-current-schema.json
+```
+
+What this does:
+
+- imports the official DROID modality config
+- starts the official ZeroMQ `PolicyServer`
+- talks to it through the official `PolicyClient`
+- records the official video/state/action keys and horizons
+
+Minimum success condition:
+
+- JSON artifact written
+- `roundtrip_ok: true`
+- `reset_ok: true`
+
+### 3. Run the MolmoAct2 probe
+
+```bash
+python3 scripts/spike_molmoact2_current_schema.py \
+  --molmoact2-repo-root /tmp/vla_sources/molmoact2 \
+  --write-json docs/spikes/artifacts/molmoact2-current-schema.json
+```
+
+What this does:
+
+- imports the official DROID and YAM FastAPI server modules
+- builds both apps via the real `build_app(...)` functions
+- drives them through `fastapi.testclient.TestClient`
+- records which current-schema mappings work honestly and which fail
+
+Minimum success condition:
+
+- JSON artifact written
+- DROID mapped request returns `200`
+- YAM official-shape request returns `200`
+- raw current flat schema fails for both with missing required fields
+
+### 4. Write the report
+
+After both artifacts exist:
+
+- update `docs/pain/current-schema-observed-pain.md`
+- update `docs/spikes/upstream-default-source-map.md`
+- only then move to Phase 3

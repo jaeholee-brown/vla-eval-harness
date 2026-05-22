@@ -12,3 +12,7 @@ The first real report should be written only after:
 - a `MolmoAct2` spike exists
 
 That report should drive the first internal representation design.
+
+Current contents:
+
+- `current-schema-observed-pain.md`: completed phase-2 report based on live GR00T and MolmoAct2 source-backed probes

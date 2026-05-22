@@ -25,6 +25,10 @@ Implemented now:
 - unit, fidelity-harness, and hardware-smoke test scaffolding
 - phase-1.5 fidelity guards for preprocessing claims and configurable action-parity tolerances
 - phase-1.5 fidelity closure against live `pi05_droid`
+- phase-2 runtime spike probes for `GR00T` and `MolmoAct2`
+- phase-2 observed pain report
+- source-backed phase-2 probe artifacts under `docs/spikes/artifacts/`
+- an upstream-default source map for future adapter templates
 
 Not implemented yet:
 
@@ -50,15 +54,16 @@ pytest tests/hardware
 
 The fidelity and hardware suites are intentionally skip-heavy until the required external dependencies, captured frame corpora, and hardware backends are available.
 
-## Phase 2 Status
+## Current Phase Status
 
-Phase 1.5 has been earned on GPU, so Phase 2 is now unblocked.
+Phase 1.5 has been earned on GPU, and Phase 2 is complete.
 
-Phase 2 is a spike, not full adapter implementation. Its output should be:
+Completed Phase-2 outputs:
 
-- one `GR00T` managed-local-server runtime spike
-- one official `MolmoAct2` FastAPI runtime spike
+- one `GR00T` runtime spike using official source-backed probes
+- one official `MolmoAct2` runtime spike using the real FastAPI apps
 - one observed-pain report in `docs/pain/current-schema-observed-pain.md`
+- one upstream-default source map in `docs/spikes/upstream-default-source-map.md`
 
 Step-by-step instructions for running the three gating tests are in
 [docs/runbooks/phase-1.5-fidelity.md](docs/runbooks/phase-1.5-fidelity.md).
@@ -68,6 +73,14 @@ Step-by-step instructions for the runtime spikes are in
 
 The full implementation plan and phase ordering are in
 [docs/implementation-plan.md](docs/implementation-plan.md).
+
+Phase 3 is now the next implementation target: define the transport-neutral internal representation from the concrete failures captured in the pain report.
+
+The phase-2 source-backed artifacts that justify that work are in:
+
+- [docs/spikes/artifacts/gr00t-current-schema.json](docs/spikes/artifacts/gr00t-current-schema.json)
+- [docs/spikes/artifacts/molmoact2-current-schema.json](docs/spikes/artifacts/molmoact2-current-schema.json)
+- [docs/spikes/upstream-default-source-map.md](docs/spikes/upstream-default-source-map.md)
 
 ## Upstream Boundary
 
