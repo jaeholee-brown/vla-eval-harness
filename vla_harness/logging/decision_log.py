@@ -43,6 +43,9 @@ class PolicyMetadata:
     chunk_size: int | None
     prompt_format_source: str | None
     image_preprocess: ImagePreprocessMetadata
+    runtime_family: str | None = None
+    schema_source: str | None = None
+    normalization_tag: str | None = None
 
 
 @dataclasses.dataclass(slots=True)
@@ -54,6 +57,9 @@ class EmbodimentMetadata:
     parked_arm_rule: str | None
     control_hz: float | None
     chunk_consumption_policy: str | None
+    arm_group_names: tuple[str, ...] | None = None
+    camera_roles: tuple[str, ...] | None = None
+    camera_role_source: str | None = None
 
 
 @dataclasses.dataclass(slots=True)
