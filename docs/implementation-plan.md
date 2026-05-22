@@ -92,8 +92,7 @@ Closed on a GPU (no longer "incomplete"):
 
 Not implemented yet:
 
-- internal representation
-- bimanual-first embodiment and policy support on the internal representation
+- first real true-bimanual embodiment and policy adapters on the internal representation
 
 ## Upstream Boundary
 
@@ -364,7 +363,7 @@ The source map is in `docs/spikes/upstream-default-source-map.md`.
 
 ### Phase 3: harness internal representation
 
-Status: ready to begin.
+Status: foundations implemented; first real true-bimanual adapters still pending.
 
 Important naming rule:
 
@@ -391,6 +390,15 @@ Initial files to add once Phase 3 begins:
 - `vla_harness/protocol/observation.py`
 - `vla_harness/protocol/action.py`
 
+Implemented now:
+
+- `vla_harness/protocol/manifest.py`
+- `vla_harness/protocol/observation.py`
+- `vla_harness/protocol/action.py`
+- `vla_harness/protocol/current_schema_bridge.py`
+- `vla_harness/adapters/policy/bimanual.py`
+- `vla_harness/adapters/embodiment/bimanual.py`
+
 Authoring-goal deliverables (non-optional — Phase 3 does not exit without these):
 
 - runnable policy-adapter skeleton at `vla_harness/adapters/policy/_skeleton.py`, with inline comments marking every spot the author must decide something
@@ -402,6 +410,13 @@ Authoring-goal deliverables (non-optional — Phase 3 does not exit without thes
   - "Mapping common upstream artifact shapes" (websocket server, FastAPI server, in-process Python entrypoint, HuggingFace policy server, managed-local-server)
 - every field in the internal representation has a one-line note on where in a typical upstream artifact an agent would find the value to put there
 - every template field is tagged as `copy_from_upstream` or `benchmark_derived`
+
+Implemented now:
+
+- `vla_harness/adapters/policy/_skeleton.py`
+- `vla_harness/adapters/embodiment/_skeleton.py`
+- `vla_harness/eval/_skeleton.py`
+- `docs/cookbook/adapter-authoring.md`
 
 Phase 3 exit criteria:
 
@@ -419,6 +434,12 @@ Recommended first implementation order inside Phase 3:
 3. make sure the representation can express `MolmoAct2-BimanualYAM` and a true-bimanual `DK-1` embodiment without projection hacks
 4. migrate `OpenPI + DK-1` through the new representation without changing its already-earned parity behavior, but only as a legacy bootstrap bridge
 5. only then add the benchmark-derived projection hooks needed for GR00T and DROID-style bridge cases
+
+Status update:
+
+- satisfied for the protocol foundation, bridge helpers, skeletons, and cookbook
+- still unproven with a live true-bimanual policy-plus-embodiment path
+- the bridge path is unit-tested, but the next substantive work is Phase 4 adapter delivery
 
 ### Phase 4: full adapters on the internal representation
 

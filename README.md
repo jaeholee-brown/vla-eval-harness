@@ -14,6 +14,7 @@ fidelity oracle, not as the target shape for future adapters.
 - `vla_harness/runner/`: current-schema runner and run orchestration
 - `vla_harness/adapters/policy/`: policy adapters, starting with `OpenPI`
 - `vla_harness/adapters/embodiment/`: embodiment adapters, currently including a legacy single-active-arm `DK-1` bootstrap path kept for reference
+- `vla_harness/protocol/`: bimanual-first internal representation and legacy flat-schema bridge helpers
 - `vla_harness/logging/`: structured fairness logs
 - `archive/upstream_roboarena/`: archived upstream docs and non-harness-facing references
 
@@ -33,13 +34,16 @@ Implemented now:
 - phase-2 observed pain report
 - source-backed phase-2 probe artifacts under `docs/spikes/artifacts/`
 - an upstream-default source map for future adapter templates
+- bimanual-first internal representation dataclasses and current-schema bridge wrappers
+- runnable policy, embodiment, and parity skeletons for future adapters
+- adapter-authoring cookbook for future coding agents
 
 Not implemented yet:
 
-- real `GR00T` adapter
-- real `MolmoAct2` FastAPI bridge
-- bimanual-first internal representation
-- true bimanual `YAM` and `DK-1` protocol support
+- real `MolmoAct2-BimanualYAM` adapter
+- real true-bimanual `YAM` embodiment adapter
+- real true-bimanual `DK-1` embodiment adapter
+- real `GR00T` adapter on the new representation
 
 ## Install
 
@@ -78,15 +82,19 @@ Step-by-step instructions for the runtime spikes are in
 The full implementation plan and phase ordering are in
 [docs/implementation-plan.md](docs/implementation-plan.md).
 
-Phase 3 is now the next implementation target: define the transport-neutral,
-bimanual-first internal representation from the concrete failures captured in
-the pain report.
+Phase 3 foundations are now implemented: the transport-neutral, bimanual-first
+internal representation exists, and the historical flat-schema path can be
+bridged into it explicitly.
+
+The next implementation target is the first real true-bimanual adapters on top
+of that representation.
 
 The phase-2 source-backed artifacts that justify that work are in:
 
 - [docs/spikes/artifacts/gr00t-current-schema.json](docs/spikes/artifacts/gr00t-current-schema.json)
 - [docs/spikes/artifacts/molmoact2-current-schema.json](docs/spikes/artifacts/molmoact2-current-schema.json)
 - [docs/spikes/upstream-default-source-map.md](docs/spikes/upstream-default-source-map.md)
+- [docs/cookbook/adapter-authoring.md](docs/cookbook/adapter-authoring.md)
 
 ## Upstream Boundary
 
