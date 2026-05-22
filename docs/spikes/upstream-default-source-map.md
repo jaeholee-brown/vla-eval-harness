@@ -17,6 +17,12 @@ When designing a future adapter template, every field should land in one of two 
 
 The goal for future templates is that most fields should be `copy_from_upstream`.
 
+Current planning scope:
+
+- future embodiment work is bimanual-only
+- the historical single-active-arm `DK-1` bootstrap path remains only as a migration/reference artifact
+- future templates should default to named multi-arm groups, not `active_arm` / `parked_arm`
+
 ## GR00T
 
 Official source used in the phase-2 probe:

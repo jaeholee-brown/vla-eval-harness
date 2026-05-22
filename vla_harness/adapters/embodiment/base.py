@@ -1,4 +1,9 @@
-"""Minimal embodiment adapter protocol for the current flat schema."""
+"""Minimal embodiment adapter protocol for the historical flat-schema bootstrap.
+
+This Protocol exists to preserve the pinned current-schema reference path.
+Future embodiment adapters should target the bimanual internal representation,
+not this single-active-arm bootstrap surface.
+"""
 
 from __future__ import annotations
 
@@ -23,10 +28,16 @@ class CurrentSchemaEmbodimentAdapter(Protocol):
         *,
         session_id: str | None = None,
     ) -> dict[str, Any]:
-        """Collect a flat-schema observation packet from the active arm."""
+        """Collect a flat-schema observation packet from the active arm.
+
+        This method is legacy bootstrap support only.
+        """
 
     def execute_action_chunk(self, actions: np.ndarray, *, action_space: str) -> None:
-        """Execute one action chunk on the active arm."""
+        """Execute one action chunk on the active arm.
+
+        This method is legacy bootstrap support only.
+        """
 
     def build_embodiment_metadata(self) -> EmbodimentMetadata:
         """Return structured fairness metadata for the embodiment."""

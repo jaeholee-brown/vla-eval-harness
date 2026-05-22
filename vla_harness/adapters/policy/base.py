@@ -1,4 +1,8 @@
-"""Minimal policy adapter protocol for the current flat schema."""
+"""Minimal policy adapter protocol for the historical flat-schema bootstrap.
+
+This Protocol is kept for the pinned current-schema reference path. New policy
+adapters should target the bimanual internal representation once Phase 3 lands.
+"""
 
 from __future__ import annotations
 

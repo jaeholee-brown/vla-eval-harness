@@ -4,12 +4,16 @@
 
 The repo starts from a pinned, vendored slice of RoboArena's transport layer and builds the harness around that. It does **not** assume RoboArena already provides a rollout engine, embodiment adapters, or a generalized multi-arm protocol.
 
+Current product scope is **bimanual-only**. The historical current-schema
+single-active-arm path remains in-tree only as a bootstrap reference and
+fidelity oracle, not as the target shape for future adapters.
+
 ## What Is Here
 
 - `vla_harness/_upstream/roboarena/`: pinned upstream transport files from RoboArena commit `a07f93d`
 - `vla_harness/runner/`: current-schema runner and run orchestration
 - `vla_harness/adapters/policy/`: policy adapters, starting with `OpenPI`
-- `vla_harness/adapters/embodiment/`: embodiment adapters, starting with a single-active-arm `DK-1` path
+- `vla_harness/adapters/embodiment/`: embodiment adapters, currently including a legacy single-active-arm `DK-1` bootstrap path kept for reference
 - `vla_harness/logging/`: structured fairness logs
 - `archive/upstream_roboarena/`: archived upstream docs and non-harness-facing references
 
@@ -21,7 +25,7 @@ Implemented now:
 - current-schema gap matrix for `GR00T` and `MolmoAct2`
 - current-schema runner and structured fairness log
 - `OpenPI` current-schema adapter scaffold
-- `DK-1` single-active-arm adapter scaffold
+- legacy `DK-1` single-active-arm bootstrap adapter scaffold
 - unit, fidelity-harness, and hardware-smoke test scaffolding
 - phase-1.5 fidelity guards for preprocessing claims and configurable action-parity tolerances
 - phase-1.5 fidelity closure against live `pi05_droid`
@@ -34,8 +38,8 @@ Not implemented yet:
 
 - real `GR00T` adapter
 - real `MolmoAct2` FastAPI bridge
-- true bimanual internal representation
-- true bimanual `YAM` or `DK-1` protocol support
+- bimanual-first internal representation
+- true bimanual `YAM` and `DK-1` protocol support
 
 ## Install
 
@@ -74,7 +78,9 @@ Step-by-step instructions for the runtime spikes are in
 The full implementation plan and phase ordering are in
 [docs/implementation-plan.md](docs/implementation-plan.md).
 
-Phase 3 is now the next implementation target: define the transport-neutral internal representation from the concrete failures captured in the pain report.
+Phase 3 is now the next implementation target: define the transport-neutral,
+bimanual-first internal representation from the concrete failures captured in
+the pain report.
 
 The phase-2 source-backed artifacts that justify that work are in:
 

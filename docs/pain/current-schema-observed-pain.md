@@ -186,6 +186,7 @@ Source-of-truth code:
 
 - The internal representation must be nested and transport-neutral.
 - The migration layer from the current flat schema must make lossy projections explicit.
+- The internal representation should optimize for honest bimanual structure first; the current flat schema is now only a legacy bootstrap bridge.
 - The future policy-adapter template must have a place to declare:
   - modality config source
   - normalization tag
@@ -225,3 +226,8 @@ Concrete consequences from this phase:
   - per-checkpoint inference call signature variants
   - explicit dropped-field and projection rules for DROID-like bridge cases
   - explicit refusal to invent missing-arm state for true-bimanual cases
+
+Because product scope is now bimanual-only:
+
+- future embodiment templates should assume named multi-arm groupings, not `active_arm` plus `parked_arm`
+- future policy templates should assume that honest true-bimanual payloads are the default target, not an optional extension

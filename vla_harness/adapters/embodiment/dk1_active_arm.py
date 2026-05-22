@@ -1,4 +1,8 @@
-"""Current-schema DK-1 adapter scoped to one active arm on a bimanual rig."""
+"""Legacy current-schema DK-1 adapter scoped to one active arm on a bimanual rig.
+
+This adapter is retained as the historical bootstrap used to close Phase 1.
+Future DK-1 work should target the bimanual internal representation directly.
+"""
 
 from __future__ import annotations
 
@@ -52,7 +56,7 @@ class DK1ActiveArmConfig:
 
 
 class DK1ActiveArmAdapter(CurrentSchemaEmbodimentAdapter):
-    """Maps one active DK-1 arm into RoboArena's current flat schema."""
+    """Maps one active DK-1 arm into RoboArena's historical flat schema."""
 
     def __init__(self, backend: DK1Backend, config: DK1ActiveArmConfig | None = None) -> None:
         self._backend = backend

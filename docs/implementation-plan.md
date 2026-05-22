@@ -47,11 +47,13 @@ Primary goals:
 - make every non-official choice visible in a fairness log
 - build around a pinned upstream transport slice instead of overstating RoboArena as a full harness
 - defer the internal representation until real adapter pain has been observed
+- target only bimanual embodiments going forward
 
 Non-goals for the current phase:
 
 - public benchmark compatibility promises
 - true bimanual protocol support in the current flat schema
+- new single-arm embodiment support beyond the historical bootstrap path
 - reimplementation of official model runtimes
 - early standardization of a generalized transport or payload format
 
@@ -65,7 +67,7 @@ Implemented and checked in:
 - current-schema runner
 - structured fairness log with tolerance fields
 - `OpenPI` current-schema adapter
-- `DK-1` single-active-arm adapter
+- legacy `DK-1` single-active-arm bootstrap adapter
 - `OpenPI` parity callables (with deterministic per-fixture noise so the
   flow-matching action parity test is meaningful)
 - DROID fixture fetcher
@@ -91,7 +93,7 @@ Closed on a GPU (no longer "incomplete"):
 Not implemented yet:
 
 - internal representation
-- true-bimanual embodiment support
+- bimanual-first embodiment and policy support on the internal representation
 
 ## Upstream Boundary
 
@@ -140,7 +142,7 @@ This spike already established the critical constraint:
 
 ### Phase 1: current-schema `OpenPI + DK-1`
 
-Status: scaffold complete and fidelity proven on `OpenPI`; real `DK-1` hardware smoke is still separate work.
+Status: historical bootstrap complete and fidelity proven on `OpenPI`; real `DK-1` hardware smoke is still separate work.
 
 What Phase 1 means:
 
@@ -148,6 +150,12 @@ What Phase 1 means:
 - one parked arm managed entirely by the embodiment layer
 - current flat schema only
 - no true bimanual claim
+
+Important scope update:
+
+- this path is retained as a bootstrap reference only
+- future product work should not add new single-arm adapters
+- future `DK-1`, `YAM`, and other embodiments should target the bimanual internal representation directly
 
 Code already present:
 
@@ -369,11 +377,13 @@ Required properties:
 
 - transport-neutral payload model
 - explicit support for multi-arm grouping
+- explicit support for named left/right arm groups as first-class structure
 - explicit support for relative EEF delta semantics
 - no universal assumption that history is encoded in tensor rank
 - no universal assumption that stereo is always separate streams or always channels
 - migration path from the current flat schema
 - every structured field is either directly copyable from upstream artifacts or explicitly marked as a benchmark-derived projection rule
+- no design effort spent preserving single-arm ergonomics beyond the migration bridge from the historical bootstrap path
 
 Initial files to add once Phase 3 begins:
 
@@ -404,19 +414,20 @@ Phase 3 exit criteria:
 
 Recommended first implementation order inside Phase 3:
 
-1. define typed dataclasses for stream names, stream sampling, stream semantics, and arm grouping
-2. migrate `OpenPI + DK-1` through the new representation without changing its already-earned parity behavior
-3. encode the direct-copy fields identified in `docs/spikes/upstream-default-source-map.md`
-4. only then add the benchmark-derived projection hooks needed for GR00T and MolmoAct2 bridge cases
+1. define typed dataclasses for stream names, stream sampling, stream semantics, camera roles, and named left/right arm groupings
+2. encode the direct-copy fields identified in `docs/spikes/upstream-default-source-map.md`
+3. make sure the representation can express `MolmoAct2-BimanualYAM` and a true-bimanual `DK-1` embodiment without projection hacks
+4. migrate `OpenPI + DK-1` through the new representation without changing its already-earned parity behavior, but only as a legacy bootstrap bridge
+5. only then add the benchmark-derived projection hooks needed for GR00T and DROID-style bridge cases
 
 ### Phase 4: full adapters on the internal representation
 
 Order:
 
-1. `GR00T`
-2. `MolmoAct2`
-3. `YAM`
-4. true-bimanual `DK-1`, only if still needed after `YAM`
+1. `MolmoAct2-BimanualYAM`
+2. true-bimanual `YAM`
+3. true-bimanual `DK-1`
+4. `GR00T`
 
 Rules:
 
@@ -426,6 +437,11 @@ Rules:
 - all adapters must continue emitting structured fairness metadata plus free-form notes
 
 Phase 4 is when the harness earns the right to say it supports more than the current bootstrap path.
+
+Because product scope is bimanual-only, Phase 4 is not done when a single-arm
+policy path works through the new representation. It is done when the first
+true-bimanual policy-plus-embodiment path is real, documented, and usable as a
+template for later adapters.
 
 Authoring-goal deliverables for Phase 4:
 

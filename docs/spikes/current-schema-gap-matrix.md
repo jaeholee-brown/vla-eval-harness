@@ -2,6 +2,12 @@
 
 This spike forces the current RoboArena `PolicyServerConfig` / flat observation-action schema onto the first pressure-test models before the harness commits to a broader internal representation.
 
+Scope update:
+
+- this document records why the historical bootstrap had to stay single-active-arm
+- current product scope is now bimanual-only
+- no future embodiment adapter should target this flat schema except as a migration or fidelity-reference bridge
+
 ## Current schema summary
 
 The current flat schema can express:
@@ -92,7 +98,7 @@ Impossible:
 - Honest representation of true bimanual state and actions.
 - Honest representation of embodiment-specific camera contracts.
 
-## Immediate constraints on phase 1
+## Historical phase-1 constraints
 
 - Phase 1 must stay single active arm only.
 - `GR00T` must not be treated as a current-schema-native design target.
@@ -102,3 +108,8 @@ Impossible:
   - transport
   - multi-arm grouping
   - action semantics such as relative EEF deltas
+
+## Current planning implication
+
+- the next implementation phase should optimize for honest bimanual structure first
+- the current flat schema remains useful only as a pinned bootstrap oracle and migration source
