@@ -3,165 +3,264 @@
 This cookbook exists to make adding a new VLA adapter or embodiment adapter a
 translation job, not a design job.
 
-The default workflow is:
+## 1. Authoring Contract
 
-1. read the upstream release code or docs
-2. copy values into the skeleton fields tagged `copy_from_upstream`
-3. fill the smallest possible set of `benchmark_derived` fields
-4. wire a parity or replay battery
-5. record every non-official choice in the fairness log
+### 1.1 What a completed adapter must ship
 
-## Internal-Representation Field Guide
+Every new adapter must ship with all of the following:
 
-Every field in the Phase-3 internal representation should be sourced from one of
-these upstream artifacts whenever possible.
+1. one adapter module copied from the relevant skeleton
+2. one CPU-only unit test that proves:
+   - the adapter constructs
+   - the adapter satisfies the harness Protocol
+   - dummy observations or actions produce the right shapes
+   - the fairness log metadata is fully populated
+3. one fairness-log note set that records every benchmark-derived choice
+4. one parity or replay battery plan, even if the full oracle needs a GPU or hardware later
 
-| Field | Where to find it upstream | Typical examples |
-| --- | --- | --- |
-| `arm_groups.side` | embodiment docs / SDK / robot config | left arm, right arm |
-| `arm_groups.control_role` | official embodiment or policy scope; otherwise benchmark bridge rule | policy-controlled, static-pad-only |
-| `video_streams.name` | request schema / modality config | `top_cam`, `wrist_image_left` |
-| `video_streams.role` | request schema / camera docs | top, wrist, exterior |
-| `video_streams.order_index` | request schema order or modality-config order | YAM `[top, left, right]` |
-| `video_streams.sample_indices` | modality config / history config | GR00T `[-15, 0]` |
-| `state_streams.name` | request schema / modality config | `joint_position`, `eef_9d` |
-| `state_streams.dim` | validation code / model config | `7`, `9`, `14` |
-| `state_streams.layout` | model docs / server validation | `joint_position`, `xyz_rot6d` |
-| `state_streams.origin` | embodiment sensors vs benchmark derivation rule | sensor, derived |
-| `action_streams.name` | policy output schema | `policy_action`, `eef_9d` |
-| `action_streams.dim` | action head or server contract | `8`, `17`, `14` |
-| `action_streams.semantics` | modality config / policy docs | relative EEF, absolute gripper |
-| `language_fields.name` | request schema | `instruction`, `prompt` |
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-If you cannot point to an upstream artifact for a field, mark it
-`benchmark_derived` and explain why.
+### 1.2 Source-of-truth policy
 
-## How To Add A New VLA
+Every field in an adapter must be tagged mentally as one of:
 
-1. Start from [vla_harness/adapters/policy/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/policy/_skeleton.py).
-2. Gather the upstream artifacts:
-   - repo or model card
-   - official inference server or Python entrypoint
-   - request schema or modality-config file
-   - checkpoint identifiers
-   - normalization tag or equivalent deployment metadata
-3. Fill the `copy_from_upstream` fields first:
-   - `policy_family`
-   - `runtime_family`
-   - `schema_source`
-   - `checkpoint_ref`
-   - `normalization_tag`
-   - camera roles, state layouts, action semantics in the manifest
-4. Decide whether the policy is:
-   - native bimanual
-   - single-arm on a bimanual setup
-5. If it is single-arm only, set exactly two bridge fields:
-   - which arm it controls
-   - which static padding rule keeps the other arm still
-6. Implement `build_manifest()` from the upstream schema source.
-7. Implement `infer()` by converting the harness `ObservationPacket` into the official runtime input.
-8. Add a parity or replay battery using [vla_harness/eval/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/eval/_skeleton.py).
-9. Add at least one negative control.
+- `copy_from_upstream`
+- `benchmark_derived`
+- `scoped_out`
 
-### VLA examples already informing this repo
+The default rule is simple: if the release blog, repo, model card, config file,
+or SDK names a value explicitly, copy that value. Only invent a
+`benchmark_derived` value when the upstream artifacts are silent or when the
+harness is doing the one allowed single-arm-on-bimanual bridge.
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+## 2. New VLA Adapter
+
+### 2.1 Gather the upstream artifacts first
+
+Before touching code, collect:
+
+1. the official repo or model card
+2. the official inference entrypoint or server
+3. the request schema or modality-config source file
+4. the checkpoint identifier
+5. the normalization tag, embodiment tag, or equivalent deployment metadata
+6. the camera order and state/action key names
+
+Examples already in this repo:
 
 - `OpenPI`: historical flat-schema bootstrap and parity oracle
-- `GR00T`: modality config with explicit temporal sampling and mixed action semantics
-- `MolmoAct2-DROID`: bridgeable single-arm request schema
-- `MolmoAct2-BimanualYAM`: honest true-bimanual request schema
+- `MolmoAct2-BimanualYAM`: official FastAPI server with ordered cameras and a norm tag
+- `GR00T`: official managed local server plus modality config
 
-## How To Add A New Embodiment
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-1. Start from [vla_harness/adapters/embodiment/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/embodiment/_skeleton.py).
-2. Gather the upstream artifacts:
-   - official SDK or robot runtime
-   - camera layout docs
-   - proprio/state APIs
-   - control frequency and chunk-consumption behavior if documented
-3. Fill the `copy_from_upstream` fields first:
-   - `embodiment_family`
-   - `backend_name`
-   - camera role order
-   - left/right arm identifiers
-   - state sources
-   - control frequency
-4. Implement `capture_observation()` so that both arms and all ordered cameras are represented honestly.
-5. Implement `execute_action()` so that:
-   - policy-controlled arms consume their streams directly
-   - static-padding arms stay still explicitly if a single-arm policy is bridged in
-6. Add a dry-run or replay test before live motion.
+### 2.2 Fill the policy config block before writing logic
 
-## Mapping Common Upstream Artifact Shapes
+Start from [vla_harness/adapters/policy/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/policy/_skeleton.py).
 
-### Websocket server
+Fill these fields first:
 
-Typical shape:
+- `policy_family`
+- `runtime_family`
+- `schema_source`
+- `checkpoint_ref`
+- `normalization_tag`
+- `prompt_format_source`
+- `dtype`
+- `device`
 
-- one remote metadata endpoint or handshake
-- one inference method returning an action chunk
+If the policy is single-arm only, fill exactly two bridge fields:
 
-Example:
+- which arm it controls
+- which static padding rule keeps the other arm still
 
-- `OpenPI`
+Do not write runtime logic until these fields are complete and sourced.
 
-Use:
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-- copy request keys into the manifest
-- bridge transport locally
-- keep the server-specific transport details out of the manifest
+### 2.3 Build the manifest directly from the upstream schema
 
-### FastAPI server
+`build_manifest()` should be a nearly mechanical projection of the official
+request schema or modality config:
 
-Typical shape:
+- `VideoStreamSpec` entries from the official camera keys and order
+- `StateStreamSpec` entries from official state keys and dimensions
+- `ActionStreamSpec` entries from official action keys, horizon, and semantics
+- `LanguageFieldSpec` from the official instruction key
 
-- HTTP route with JSON or `json_numpy` payload
-- embodiment-specific request body
+For `GR00T`, the modality config is the source of truth for:
 
-Example:
+- `sample_indices`
+- action horizon
+- action representation
 
-- `MolmoAct2`
+For `MolmoAct2-BimanualYAM`, the server schema is the source of truth for:
 
-Use:
+- `top_cam`, `left_cam`, `right_cam`
+- 14-D concatenated state
+- 14-D action chunk
 
-- copy route request fields, camera order, and normalization tag directly
-- keep HTTP mechanics adapter-local
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-### Managed local server
+### 2.4 Convert `ObservationPacket` into the official runtime input
 
-Typical shape:
+`infer()` must do the smallest possible translation:
 
-- subprocess or local server process
-- sidecar client
-- modality config or embodiment tag in code
+- reorder or rename cameras exactly as the official runtime expects
+- concatenate or split state only when the official runtime requires it
+- preserve temporal sampling from the manifest
+- preserve the official language key and shape
 
-Example:
+Do not normalize, resize, or reorder anything unless the upstream runtime
+itself requires it.
 
-- `GR00T`
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-Use:
+### 2.5 Convert the official runtime output back into `ActionPacket`
 
-- copy stream names, temporal indices, and action semantics from the modality config
-- keep lifecycle and subprocess control adapter-local
+Action decoding should also be mechanical:
 
-### In-process Python entrypoint
+- map official action keys to harness arm groups
+- preserve the official action horizon
+- preserve official absolute vs relative semantics
+- only use `PaddingRule` when a single-arm policy is bridged onto a bimanual setup
 
-Typical shape:
+Do not silently reinterpret relative EEF deltas as absolute joint targets, or
+vice versa.
 
-- direct `predict(...)` or `forward(...)`
-- no official server wrapper
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-Use:
+### 2.6 Ship the CPU-only smoke test
 
-- keep the manifest tied to the upstream callable signature
-- add a small harness-local wrapper only if needed for parity controls or replay
+Every policy adapter must ship with a CPU-only unit test patterned after the
+unit tests already in this repo. The test must prove:
 
-## When To Use The Single-Arm Bridge
+1. adapter construction works
+2. `assert_ready_for_benchmark()` is meaningful
+3. `build_manifest()` returns a valid `HarnessManifest`
+4. dummy `ObservationPacket` input produces action chunks with the expected shape
+5. `build_policy_metadata()` and `build_notes()` fully populate the fairness log surface
 
-Use it only when all of the following are true:
+The smoke test is the fast “did I wire this right” check. The parity oracle can
+be slower and can depend on a GPU or real checkpoints later.
 
-1. the policy is genuinely single-arm only
-2. the embodiment is bimanual
-3. you can keep the uncontrolled arm still with an explicit padding rule
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
 
-Do not use the bridge to fake true-bimanual support. If the upstream policy is
-already bimanual, represent both arms honestly in the manifest and action packet.
+## 3. New Embodiment Adapter
+
+### 3.1 Gather the embodiment artifacts first
+
+Before touching code, collect:
+
+1. the official SDK, runtime, or robot backend
+2. camera layout docs or config files
+3. available proprio/state APIs
+4. published control frequency
+5. published action consumption or teleop cadence
+
+Examples already in this repo:
+
+- `YAM`: left/front/right cameras at 30 Hz from the published YAML configs
+- `DK-1`: `bi_dk1_follower` with head/right_wrist/left_wrist cameras and a 200 Hz teleop example
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+### 3.2 Fill the embodiment config block first
+
+Start from [vla_harness/adapters/embodiment/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/embodiment/_skeleton.py).
+
+Fill these fields before writing logic:
+
+- `embodiment_family`
+- `backend_name`
+- `control_hz`
+- `chunk_consumption_policy`
+- camera role order
+- arm group names
+- state sources
+
+Only `static_padding_rule` is expected to be benchmark-derived when you are
+bridging a single-arm policy onto a bimanual embodiment.
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+### 3.3 Build `capture_observation()` as an honest projection of the hardware
+
+`capture_observation()` should:
+
+- read the official cameras in their published order
+- map each role through an explicit alias table when needed
+- read per-arm state streams without fabricating missing values
+- preserve temporal sample counts required by the manifest
+
+Examples:
+
+- YAM `top` is a deliberate alias to the published `front_camera`
+- DK-1 `top` is a deliberate alias to the published `head` camera
+
+Those aliases belong in config and fairness notes, not in hidden code.
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+### 3.4 Build `execute_action()` so action ownership is explicit
+
+`execute_action()` must:
+
+- pass policy-controlled arm streams directly to the official control backend
+- apply static-padding behavior only to the uncontrolled arm
+- never invent motion for an arm not covered by the policy
+
+The only allowed benchmark-side bridge is:
+
+- one arm receives real policy outputs
+- the other arm receives an explicit static padding rule
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+### 3.5 Ship the CPU-only smoke test
+
+Every embodiment adapter must ship with a CPU-only unit test that proves:
+
+1. adapter construction works
+2. `capture_observation()` returns a protocol-valid `ObservationPacket`
+3. `execute_action()` accepts protocol-valid `ActionPacket`s
+4. role aliases and arm-group names are wired correctly
+5. `build_embodiment_metadata()` and `build_notes()` fully populate the fairness log surface
+
+Use fake backends and dummy frames/states. This test should run in seconds.
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+## 4. Evaluation and Validation
+
+### 4.1 Start with the smoke test, then add parity
+
+Use [vla_harness/eval/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/eval/_skeleton.py) after the CPU smoke test is green.
+
+The order is:
+
+1. CPU smoke test
+2. replay battery
+3. official parity oracle
+4. negative control
+
+Do not start with the GPU oracle when a broken constructor or shape mismatch can
+be detected in two seconds on CPU.
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.
+
+### 4.2 Negative controls are mandatory
+
+Every parity battery must include one deliberate break path that proves the
+battery can fail. Examples:
+
+- permute camera order
+- shift one state dimension
+- claim the wrong chunk horizon
+- feed the wrong prompt key
+
+The harness should never accept a parity battery that only ever passes.
+
+If you can't fill this in from upstream docs alone, the protocol design has failed and we need to revisit it.

@@ -46,7 +46,7 @@ class SkeletonBimanualEmbodimentAdapter(BimanualEmbodimentAdapter):
         self._config = config
 
     def prepare_episode(self, manifest: HarnessManifest, prompt: str) -> None:
-        # TODO(copy_from_upstream): home/reset both arms using the official robot stack.
+        # TODO(copy_from_upstream, cookbook §3.2): home/reset both arms using the official robot stack.
         del manifest, prompt
         return None
 
@@ -57,15 +57,15 @@ class SkeletonBimanualEmbodimentAdapter(BimanualEmbodimentAdapter):
         *,
         session_id: str | None = None,
     ) -> ObservationPacket:
-        # TODO(copy_from_upstream): read the official camera feeds and proprio streams, then
+        # TODO(copy_from_upstream, cookbook §3.3): read the official camera feeds and proprio streams, then
         # place them into the ObservationPacket exactly as named by the manifest.
         del manifest, prompt, session_id
         raise NotImplementedError
 
     def execute_action(self, manifest: HarnessManifest, action: ActionPacket) -> None:
-        # TODO(copy_from_upstream): execute each arm's action streams through the official control API.
-        # TODO(benchmark_derived): if one arm is covered only by a padding rule, apply the configured
-        # static-padding behavior here instead of inventing motion.
+        # TODO(copy_from_upstream, cookbook §3.4): execute each arm's action streams through the official control API.
+        # TODO(benchmark_derived, cookbook §3.4): if one arm is covered only by a padding rule, apply the
+        # configured static-padding behavior here instead of inventing motion.
         del manifest, action
         raise NotImplementedError
 

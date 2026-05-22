@@ -16,6 +16,7 @@ EVAL_TEMPLATE_FIELD_GUIDE = {
     "official_callable_source": "copy_from_upstream: direct policy entrypoint, official server, or official health/inference API",
     "negative_control": "benchmark_derived: one deliberate break path that proves the parity battery can fail",
     "tolerances": "benchmark_derived but mandatory: record exact atol/rtol used for the adapter",
+    "cpu_smoke_test": "copy_from_this_repo: every adapter ships with a CPU-only smoke test before any GPU oracle",
 }
 
 
@@ -39,7 +40,8 @@ def run_parity_battery(
 ) -> list[tuple[str, float]]:
     """Minimal parity harness for future adapter-specific eval code.
 
-    Replace this with a richer battery once you know the upstream runtime shape.
+    TODO(copy_from_upstream, cookbook §4.1): replace this with a richer battery once you know the upstream runtime shape.
+    TODO(benchmark_derived, cookbook §4.2): add at least one negative control that proves the battery can fail.
     """
 
     diffs: list[tuple[str, float]] = []

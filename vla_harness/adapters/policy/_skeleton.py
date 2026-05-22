@@ -57,23 +57,24 @@ class SkeletonBimanualPolicyAdapter(BimanualPolicyAdapter):
         self._config = config
 
     def assert_ready_for_benchmark(self) -> None:
-        # TODO(copy_from_upstream): wire any official runtime-health checks here.
+        # TODO(copy_from_upstream, cookbook §2.2): wire any official runtime-health checks here.
         return None
 
     def build_manifest(self) -> HarnessManifest:
-        # TODO(copy_from_upstream): build manifest fields directly from the official request schema
-        # or modality-config source named in self._config.schema_source.
+        # TODO(copy_from_upstream, cookbook §2.3): build manifest fields directly from the official
+        # request schema or modality-config source named in self._config.schema_source.
         raise NotImplementedError
 
     def infer(self, observation: ObservationPacket) -> ActionPacket:
-        # TODO(copy_from_upstream): convert ObservationPacket into the official runtime input.
-        # TODO(benchmark_derived): if the policy is single-arm only, emit one arm group plus an
-        # explicit static-padding rule for the other arm.
+        # TODO(copy_from_upstream, cookbook §2.4): convert ObservationPacket into the official runtime input.
+        # TODO(copy_from_upstream, cookbook §2.5): convert the official runtime output back into ActionPacket.
+        # TODO(benchmark_derived, cookbook §2.5): if the policy is single-arm only, emit one arm group plus
+        # an explicit static-padding rule for the other arm.
         del observation
         raise NotImplementedError
 
     def reset(self, reset_info: dict[str, Any]) -> Any:
-        # TODO(copy_from_upstream): delegate to the official reset/session API if it exists.
+        # TODO(copy_from_upstream, cookbook §2.2): delegate to the official reset/session API if it exists.
         del reset_info
         return None
 
