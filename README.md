@@ -59,6 +59,9 @@ Do not start the `GR00T` / `MolmoAct2` runtime spike until all three of these ar
 
 Phase 2 is a spike, not full adapter implementation. Its output should be an observed-pain report in `docs/pain/`.
 
+Step-by-step instructions for running the three gating tests are in
+[docs/runbooks/phase-1.5-fidelity.md](docs/runbooks/phase-1.5-fidelity.md).
+
 ## Upstream Boundary
 
 - The vendored upstream slice is pinned at RoboArena commit `a07f93d`.

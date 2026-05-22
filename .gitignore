@@ -195,4 +195,5 @@ cython_debug/
 # Local planning and run artifacts
 references/
 runs/
+fixtures/
 .cursorindexingignore
