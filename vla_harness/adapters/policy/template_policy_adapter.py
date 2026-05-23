@@ -1,9 +1,10 @@
-"""Runnable skeleton for future bimanual policy adapters.
+"""First-class template for new bimanual policy adapters.
 
+Copy this module to a new file (e.g. ``my_policy.py``) and replace the TODOs.
 Every field below is tagged as either:
 
-- `copy_from_upstream`: fill this by reading official release code or docs
-- `benchmark_derived`: fill this only when the upstream artifact is silent or
+- ``copy_from_upstream``: fill this by reading official release code or docs
+- ``benchmark_derived``: fill this only when the upstream artifact is silent or
   when the policy must be bridged into a bimanual setup
 """
 
@@ -50,8 +51,12 @@ class PolicyTemplateConfig:
     single_arm_padding_rule: str | None = None
 
 
-class SkeletonBimanualPolicyAdapter(BimanualPolicyAdapter):
-    """Copy this file and replace the TODOs with one concrete policy adapter."""
+class TemplatePolicyAdapter(BimanualPolicyAdapter):
+    """Concrete starting point for a new bimanual policy adapter.
+
+    Copy this file into the same package and rename the class. Every NotImplementedError
+    marks a spot where the upstream policy source is the authority.
+    """
 
     def __init__(self, config: PolicyTemplateConfig) -> None:
         self._config = config

@@ -1,9 +1,10 @@
-"""Runnable skeleton for future bimanual embodiment adapters.
+"""First-class template for new bimanual embodiment adapters.
 
+Copy this module to a new file (e.g. ``my_robot.py``) and replace the TODOs.
 Every field below is tagged as either:
 
-- `copy_from_upstream`: read this from official embodiment docs, configs, or SDK
-- `benchmark_derived`: choose this only when the official embodiment stack is silent
+- ``copy_from_upstream``: read this from official embodiment docs, configs, or SDK
+- ``benchmark_derived``: choose this only when the official embodiment stack is silent
 """
 
 from __future__ import annotations
@@ -39,8 +40,12 @@ class EmbodimentTemplateConfig:
     static_padding_rule: str = "hold_static"
 
 
-class SkeletonBimanualEmbodimentAdapter(BimanualEmbodimentAdapter):
-    """Copy this file and replace the TODOs with one concrete embodiment adapter."""
+class TemplateEmbodimentAdapter(BimanualEmbodimentAdapter):
+    """Concrete starting point for a new bimanual embodiment adapter.
+
+    Copy this file into the same package and rename the class. Every NotImplementedError
+    marks a spot where the official embodiment stack is the authority.
+    """
 
     def __init__(self, config: EmbodimentTemplateConfig) -> None:
         self._config = config

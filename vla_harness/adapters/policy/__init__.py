@@ -1,39 +1,19 @@
-"""Policy adapters."""
+"""Policy adapters.
 
-from vla_harness.adapters.policy._skeleton import PolicyTemplateConfig
-from vla_harness.adapters.policy._skeleton import SkeletonBimanualPolicyAdapter
+Bimanual is the canonical surface. To author a new adapter, copy
+``template_policy_adapter.py`` into this package and fill in the TODOs.
+
+Concrete adapters (``GR00TPolicyAdapter``, ``OpenPIAlohaPolicyAdapter``,
+``MolmoAct2YAMPolicyAdapter``) are intentionally not re-exported here — import
+them by their full module path to keep this package free of per-adapter churn.
+"""
+
 from vla_harness.adapters.policy.bimanual import BimanualPolicyAdapter
-from vla_harness.adapters.policy.gr00t import GR00TPolicyAdapter
-from vla_harness.adapters.policy.gr00t import Gr00tActionBinding
-from vla_harness.adapters.policy.gr00t import Gr00tLanguageBinding
-from vla_harness.adapters.policy.gr00t import Gr00tRuntimeConfig
-from vla_harness.adapters.policy.gr00t import Gr00tStateBinding
-from vla_harness.adapters.policy.gr00t import Gr00tVideoBinding
-from vla_harness.adapters.policy.molmoact2_yam import MolmoAct2YAMPolicyAdapter
-from vla_harness.adapters.policy.molmoact2_yam import MolmoAct2YAMRuntimeConfig
-from vla_harness.adapters.policy.base import CurrentSchemaPolicyAdapter
-from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaClient
-from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaPolicyAdapter
-from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaRuntimeConfig
-from vla_harness.adapters.policy.openpi_current_schema import OpenPICurrentSchemaAdapter
-from vla_harness.adapters.policy.openpi_current_schema import OpenPIRuntimeConfig
+from vla_harness.adapters.policy.template_policy_adapter import PolicyTemplateConfig
+from vla_harness.adapters.policy.template_policy_adapter import TemplatePolicyAdapter
 
 __all__ = [
     "BimanualPolicyAdapter",
-    "CurrentSchemaPolicyAdapter",
-    "GR00TPolicyAdapter",
-    "Gr00tActionBinding",
-    "Gr00tLanguageBinding",
-    "Gr00tRuntimeConfig",
-    "Gr00tStateBinding",
-    "Gr00tVideoBinding",
-    "MolmoAct2YAMPolicyAdapter",
-    "MolmoAct2YAMRuntimeConfig",
-    "OpenPIAlohaClient",
-    "OpenPIAlohaPolicyAdapter",
-    "OpenPIAlohaRuntimeConfig",
-    "OpenPICurrentSchemaAdapter",
-    "OpenPIRuntimeConfig",
     "PolicyTemplateConfig",
-    "SkeletonBimanualPolicyAdapter",
+    "TemplatePolicyAdapter",
 ]
