@@ -158,10 +158,10 @@ Important scope update:
 
 Code already present:
 
-- `vla_harness/runner/current_schema_runner.py`
-- `vla_harness/adapters/policy/openpi_current_schema.py`
-- `vla_harness/adapters/embodiment/dk1_active_arm.py`
-- `vla_harness/eval/openpi_callables.py`
+- `vla_harness/legacy/current_schema_runner.py`
+- `vla_harness/legacy/openpi_current_schema.py`
+- `vla_harness/legacy/dk1_active_arm.py`
+- `vla_harness/legacy/openpi_callables.py`
 - `scripts/fetch_droid_fixtures.py`
 
 What changed after the GPU run:
@@ -395,14 +395,14 @@ Implemented now:
 - `vla_harness/protocol/manifest.py`
 - `vla_harness/protocol/observation.py`
 - `vla_harness/protocol/action.py`
-- `vla_harness/protocol/current_schema_bridge.py`
+- `vla_harness/legacy/current_schema_bridge.py`
 - `vla_harness/adapters/policy/bimanual.py`
 - `vla_harness/adapters/embodiment/bimanual.py`
 
 Authoring-goal deliverables (non-optional — Phase 3 does not exit without these):
 
-- runnable policy-adapter skeleton at `vla_harness/adapters/policy/_skeleton.py`, with inline comments marking every spot the author must decide something
-- runnable embodiment-adapter skeleton at `vla_harness/adapters/embodiment/_skeleton.py`
+- runnable policy-adapter template at `vla_harness/adapters/policy/template_policy_adapter.py`, with inline comments marking every spot the author must decide something
+- runnable embodiment-adapter template at `vla_harness/adapters/embodiment/template_embodiment_adapter.py`
 - runnable parity-callables skeleton at `vla_harness/eval/_skeleton.py`
 - first draft of `docs/cookbook/adapter-authoring.md` with sections:
   - "How to add a new VLA"
@@ -413,8 +413,8 @@ Authoring-goal deliverables (non-optional — Phase 3 does not exit without thes
 
 Implemented now:
 
-- `vla_harness/adapters/policy/_skeleton.py`
-- `vla_harness/adapters/embodiment/_skeleton.py`
+- `vla_harness/adapters/policy/template_policy_adapter.py`
+- `vla_harness/adapters/embodiment/template_embodiment_adapter.py`
 - `vla_harness/eval/_skeleton.py`
 - `docs/cookbook/adapter-authoring.md`
 

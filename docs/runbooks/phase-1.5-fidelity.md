@@ -99,8 +99,8 @@ export OPENPI_HARNESS_PORT=8000
 
 # Preprocessing parity
 export OPENPI_PREPROCESS_FIXTURE_DIR=fixtures/openpi_preprocess
-export OPENPI_OFFICIAL_PREPROCESS=vla_harness.eval.openpi_callables:official_preprocess
-export OPENPI_HARNESS_PREPROCESS=vla_harness.eval.openpi_callables:harness_preprocess
+export OPENPI_OFFICIAL_PREPROCESS=vla_harness.legacy.openpi_callables:official_preprocess
+export OPENPI_HARNESS_PREPROCESS=vla_harness.legacy.openpi_callables:harness_preprocess
 
 # Action parity — tolerances earned on 2026-05-22 RTX 5090 run.
 # Steady-state max abs diff was 3.3e-3 across 5 DROID fixtures with
@@ -108,13 +108,13 @@ export OPENPI_HARNESS_PREPROCESS=vla_harness.eval.openpi_callables:harness_prepr
 # up to ~1.1e-2 from cuDNN auto-tuner flutter between the two independent
 # processes. 2e-2 was stable across 8 suite-mode repeats.
 export OPENPI_ACTION_FIXTURE_DIR=fixtures/openpi_action
-export OPENPI_OFFICIAL_ACTION_CALLABLE=vla_harness.eval.openpi_callables:official_action
-export OPENPI_HARNESS_ACTION_CALLABLE=vla_harness.eval.openpi_callables:harness_action
+export OPENPI_OFFICIAL_ACTION_CALLABLE=vla_harness.legacy.openpi_callables:official_action
+export OPENPI_HARNESS_ACTION_CALLABLE=vla_harness.legacy.openpi_callables:harness_action
 export OPENPI_ACTION_PARITY_ATOL=2e-2
 export OPENPI_ACTION_PARITY_RTOL=2e-2
 
 # Negative control (uses the same action corpus)
-export OPENPI_NEGATIVE_CONTROL_ACTION_CALLABLE=vla_harness.eval.openpi_callables:negative_control_action
+export OPENPI_NEGATIVE_CONTROL_ACTION_CALLABLE=vla_harness.legacy.openpi_callables:negative_control_action
 export OPENPI_NEGATIVE_CONTROL=swap_rgb     # or zero_image, shuffle_prompt
 export OPENPI_NEGATIVE_CONTROL_MIN_ABS_DIFF=1e-4
 ```
@@ -156,7 +156,7 @@ hand:
    Re-run the preprocessing parity test. It MUST fail. Then revert.
    ```bash
    source .env.fidelity
-   OPENPI_HARNESS_PREPROCESS=vla_harness.adapters.policy.openpi_current_schema:identity_preprocess \
+   OPENPI_HARNESS_PREPROCESS=vla_harness.legacy.openpi_current_schema:identity_preprocess \
        uv run pytest tests/fidelity/test_openpi_preprocessing_parity.py -v
    ```
 2. Change `OPENPI_NEGATIVE_CONTROL` between `swap_rgb`, `zero_image`, and

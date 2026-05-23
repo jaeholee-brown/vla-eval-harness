@@ -58,7 +58,7 @@ If you can't fill this in from upstream docs alone, the protocol design has fail
 
 ### 2.2 Fill the policy config block before writing logic
 
-Start from [vla_harness/adapters/policy/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/policy/_skeleton.py).
+Start from [vla_harness/adapters/policy/template_policy_adapter.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/policy/template_policy_adapter.py).
 
 Fill these fields first:
 
@@ -188,8 +188,8 @@ uv run scripts/serve_policy.py policy:checkpoint \
 Driving the adapter from harness code:
 
 ```python
-from vla_harness.adapters.policy import OpenPIAlohaPolicyAdapter
-from vla_harness.adapters.policy import OpenPIAlohaRuntimeConfig
+from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaPolicyAdapter
+from vla_harness.adapters.policy.openpi_aloha import OpenPIAlohaRuntimeConfig
 
 adapter = OpenPIAlohaPolicyAdapter(
     OpenPIAlohaRuntimeConfig(host="127.0.0.1", port=8000),
@@ -230,7 +230,7 @@ If you can't fill this in from upstream docs alone, the protocol design has fail
 
 ### 3.2 Fill the embodiment config block first
 
-Start from [vla_harness/adapters/embodiment/_skeleton.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/embodiment/_skeleton.py).
+Start from [vla_harness/adapters/embodiment/template_embodiment_adapter.py](/Users/jaeholee0404/roboarena/vla_harness/adapters/embodiment/template_embodiment_adapter.py).
 
 Fill these fields before writing logic:
 
