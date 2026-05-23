@@ -1,4 +1,9 @@
-"""Thin current-schema adapter for official openpi runtimes."""
+"""Thin current-schema adapter for official openpi runtimes.
+
+Quarantined: this adapter targets the legacy flat-schema runner. New openpi
+adapters should target the bimanual representation (see
+``vla_harness.adapters.policy.openpi_aloha`` for a worked example).
+"""
 
 from __future__ import annotations
 
@@ -15,7 +20,7 @@ from typing import Sequence
 import numpy as np
 
 from roboarena.policy_client import WebsocketClientPolicy
-from vla_harness.adapters.policy.base import CurrentSchemaPolicyAdapter
+from vla_harness.legacy.policy_protocol import CurrentSchemaPolicyAdapter
 from vla_harness.logging.decision_log import DecisionNote
 from vla_harness.logging.decision_log import ImagePreprocessMetadata
 from vla_harness.logging.decision_log import PolicyMetadata
@@ -202,7 +207,7 @@ class OpenPICurrentSchemaAdapter(CurrentSchemaPolicyAdapter):
                 choice=self._config.image_resize_filter or "unset",
                 status="official" if self._claims_official_preprocessing() else "adapter",
                 rationale="Fairness metadata must match the preprocessing path that is actually wired.",
-                evidence="vla_harness/adapters/policy/openpi_current_schema.py",
+                evidence="vla_harness/legacy/openpi_current_schema.py",
             ),
         ]
 

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from vla_harness.adapters.embodiment.dk1_active_arm import DK1ActiveArmAdapter
-from vla_harness.adapters.embodiment.dk1_active_arm import DK1ActiveArmConfig
-from vla_harness.adapters.embodiment.dk1_active_arm import DK1Observation
+from vla_harness.legacy.dk1_active_arm import DK1ActiveArmAdapter
+from vla_harness.legacy.dk1_active_arm import DK1ActiveArmConfig
+from vla_harness.legacy.dk1_active_arm import DK1Observation
 
 
 class FakeDK1Backend:

@@ -1,4 +1,7 @@
-"""Current flat-schema runner around the pinned RoboArena transport slice."""
+"""Quarantined flat-schema runner around the pinned RoboArena transport slice.
+
+New runs should use ``vla_harness.runner.BimanualRunner`` instead.
+"""
 
 from __future__ import annotations
 
@@ -9,14 +12,20 @@ import uuid
 
 import numpy as np
 
+from vla_harness._upstream import UPSTREAM_ROBOARENA_COMMIT
 from vla_harness._upstream.roboarena.utils import msgpack_numpy
-from vla_harness.adapters.embodiment.base import CurrentSchemaEmbodimentAdapter
-from vla_harness.adapters.policy.base import CurrentSchemaPolicyAdapter
+from vla_harness.legacy.embodiment_protocol import CurrentSchemaEmbodimentAdapter
+from vla_harness.legacy.policy_protocol import CurrentSchemaPolicyAdapter
 from vla_harness.logging.decision_log import FairnessLog
 from vla_harness.logging.decision_log import RuntimeMetadata
 
 
-UPSTREAM_ROBOARENA_COMMIT = "a07f93d"
+__all__ = [
+    "CurrentSchemaRunConfig",
+    "CurrentSchemaRunResult",
+    "CurrentSchemaRunner",
+    "UPSTREAM_ROBOARENA_COMMIT",
+]
 
 
 @dataclasses.dataclass(slots=True)

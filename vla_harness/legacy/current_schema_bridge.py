@@ -1,4 +1,9 @@
-"""Bridge the historical flat schema into the bimanual-first representation."""
+"""Bridge the quarantined flat schema into the bimanual-first representation.
+
+This bridge exists only so the legacy current-schema adapters can still be
+exercised through a ``BimanualRunner`` for parity work. New adapters should
+target the bimanual surface directly.
+"""
 
 from __future__ import annotations
 
@@ -9,10 +14,10 @@ from typing import Mapping
 
 import numpy as np
 
-from vla_harness.adapters.embodiment.base import CurrentSchemaEmbodimentAdapter
 from vla_harness.adapters.embodiment.bimanual import BimanualEmbodimentAdapter
-from vla_harness.adapters.policy.base import CurrentSchemaPolicyAdapter
 from vla_harness.adapters.policy.bimanual import BimanualPolicyAdapter
+from vla_harness.legacy.embodiment_protocol import CurrentSchemaEmbodimentAdapter
+from vla_harness.legacy.policy_protocol import CurrentSchemaPolicyAdapter
 from vla_harness.logging.decision_log import DecisionNote
 from vla_harness.protocol.action import ActionChunk
 from vla_harness.protocol.action import ActionPacket
@@ -417,7 +422,7 @@ class LegacyCurrentSchemaPolicyBridge(BimanualPolicyAdapter):
                     "Phase 3 wraps the historical single-arm current-schema policy path inside the "
                     "bimanual representation using an explicit padding rule for the other arm."
                 ),
-                evidence="vla_harness/protocol/current_schema_bridge.py",
+                evidence="vla_harness/legacy/current_schema_bridge.py",
             )
         )
         return notes
@@ -470,7 +475,7 @@ class LegacyCurrentSchemaEmbodimentBridge(BimanualEmbodimentAdapter):
                     "Phase 3 keeps the historical single-active-arm embodiment path available only "
                     "through an explicit bridge into the bimanual representation."
                 ),
-                evidence="vla_harness/protocol/current_schema_bridge.py",
+                evidence="vla_harness/legacy/current_schema_bridge.py",
             )
         )
         return notes

@@ -43,7 +43,7 @@ def _require_env(name: str) -> str:
     value = os.environ.get(name)
     if value is None:
         raise RuntimeError(
-            f"Environment variable {name!r} is required to use vla_harness.eval.openpi_callables."
+            f"Environment variable {name!r} is required to use vla_harness.legacy.openpi_callables."
         )
     return value
 
@@ -72,8 +72,8 @@ def _official_policy() -> Any:
 def _harness_adapter() -> Any:
     """Construct the harness OpenPI adapter once and reuse it."""
 
-    from vla_harness.adapters.policy.openpi_current_schema import OpenPICurrentSchemaAdapter
-    from vla_harness.adapters.policy.openpi_current_schema import OpenPIRuntimeConfig
+    from vla_harness.legacy.openpi_current_schema import OpenPICurrentSchemaAdapter
+    from vla_harness.legacy.openpi_current_schema import OpenPIRuntimeConfig
 
     config_name = _require_env("OPENPI_CONFIG_NAME")
     host = os.environ.get("OPENPI_HARNESS_HOST", "127.0.0.1")
@@ -87,8 +87,8 @@ def _harness_adapter() -> Any:
             image_resize_filter="official_openpi_runtime",
             image_color_space="official_openpi_runtime",
             image_output_dtype="official_openpi_runtime",
-            preprocessing_oracle_name="vla_harness.eval.openpi_callables:official_preprocess",
-            action_oracle_name="vla_harness.eval.openpi_callables:official_action",
+            preprocessing_oracle_name="vla_harness.legacy.openpi_callables:official_preprocess",
+            action_oracle_name="vla_harness.legacy.openpi_callables:official_action",
         ),
         preprocess_callable=_run_image_through_official_transforms,
     )

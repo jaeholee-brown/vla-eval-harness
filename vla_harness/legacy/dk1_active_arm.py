@@ -13,7 +13,7 @@ from typing import Protocol
 
 import numpy as np
 
-from vla_harness.adapters.embodiment.base import CurrentSchemaEmbodimentAdapter
+from vla_harness.legacy.embodiment_protocol import CurrentSchemaEmbodimentAdapter
 from vla_harness.logging.decision_log import DecisionNote
 from vla_harness.logging.decision_log import EmbodimentMetadata
 
@@ -138,6 +138,6 @@ class DK1ActiveArmAdapter(CurrentSchemaEmbodimentAdapter):
                 choice=self._config.parked_arm_rule,
                 status="adapter",
                 rationale="The parked arm is managed entirely by the embodiment layer in phase 1.",
-                evidence="vla_harness/adapters/embodiment/dk1_active_arm.py",
+                evidence="vla_harness/legacy/dk1_active_arm.py",
             ),
         ]

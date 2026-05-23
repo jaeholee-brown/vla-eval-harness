@@ -10,8 +10,8 @@ from vla_harness.logging.decision_log import EmbodimentMetadata
 from vla_harness.logging.decision_log import ImagePreprocessMetadata
 from vla_harness.logging.decision_log import PolicyMetadata
 from vla_harness.logging.decision_log import ValidationMetadata
-from vla_harness.runner.current_schema_runner import CurrentSchemaRunConfig
-from vla_harness.runner.current_schema_runner import CurrentSchemaRunner
+from vla_harness.legacy.current_schema_runner import CurrentSchemaRunConfig
+from vla_harness.legacy.current_schema_runner import CurrentSchemaRunner
 
 
 class FakePolicyAdapter:

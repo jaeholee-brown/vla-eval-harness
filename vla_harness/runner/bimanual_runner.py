@@ -7,13 +7,13 @@ from pathlib import Path
 import time
 import uuid
 
+from vla_harness._upstream import UPSTREAM_ROBOARENA_COMMIT
 from vla_harness.adapters.embodiment.bimanual import BimanualEmbodimentAdapter
 from vla_harness.adapters.policy.bimanual import BimanualPolicyAdapter
 from vla_harness.logging.decision_log import FairnessLog
 from vla_harness.logging.decision_log import RuntimeMetadata
 from vla_harness.protocol.action import ActionPacket
 from vla_harness.protocol.observation import ObservationPacket
-from vla_harness.runner.current_schema_runner import UPSTREAM_ROBOARENA_COMMIT
 
 
 @dataclasses.dataclass(slots=True)

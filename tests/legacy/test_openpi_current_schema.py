@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from vla_harness.adapters.policy.openpi_current_schema import OpenPICurrentSchemaAdapter
-from vla_harness.adapters.policy.openpi_current_schema import OpenPIRuntimeConfig
+from vla_harness.legacy.openpi_current_schema import OpenPICurrentSchemaAdapter
+from vla_harness.legacy.openpi_current_schema import OpenPIRuntimeConfig
 
 
 class FakePolicyClient:

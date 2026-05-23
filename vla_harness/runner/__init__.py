@@ -1,17 +1,15 @@
-"""Run orchestration for harness integrations."""
+"""Run orchestration for harness integrations.
+
+The canonical runner is ``BimanualRunner``. The legacy current-schema runner
+lives under ``vla_harness.legacy.current_schema_runner``.
+"""
 
 from vla_harness.runner.bimanual_runner import BimanualRunConfig
 from vla_harness.runner.bimanual_runner import BimanualRunResult
 from vla_harness.runner.bimanual_runner import BimanualRunner
-from vla_harness.runner.current_schema_runner import CurrentSchemaRunConfig
-from vla_harness.runner.current_schema_runner import CurrentSchemaRunResult
-from vla_harness.runner.current_schema_runner import CurrentSchemaRunner
 
 __all__ = [
     "BimanualRunConfig",
     "BimanualRunResult",
     "BimanualRunner",
-    "CurrentSchemaRunConfig",
-    "CurrentSchemaRunResult",
-    "CurrentSchemaRunner",
 ]
