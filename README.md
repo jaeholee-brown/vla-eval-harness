@@ -18,28 +18,71 @@ pytest tests/unit -q
 ```
 
 That runs every CPU-only adapter smoke test. If it's green, the harness is
-working on your machine. From here you can pick a policy + embodiment pair to
-drive end-to-end (see below) or start authoring a new adapter.
+working on your machine.
+
+Now drive one full episode end-to-end with the launcher — no server, no robot,
+no GPU required:
+
+```bash
+python scripts/run_episode.py \
+    --policy molmoact2_yam --embodiment fake --dry-run \
+    --prompt "pack the blocks" --max-steps 3
+```
+
+That writes a fairness log under `runs/<run-id>/decision_log.json` showing
+exactly what the policy + embodiment combination claimed and used. From here
+you can:
+
+- swap `--embodiment fake` for `--embodiment yam` (or `dk1`) and supply
+  `--backend-loader my_robot:make_backend` to drive a real robot;
+- drop `--dry-run` and pass `--server-url …` (or `--host/--port`) to talk to
+  the real upstream policy server;
+- run `python scripts/run_episode.py --list-configs` to see every tweakable
+  config field with its default for every policy and embodiment.
 
 ## Available Adapter Pairs
 
 All three policies and both embodiments are real and ship a CPU-only smoke
-test. Live validation (GPU for the policy, real robot for the embodiment) is
-the remaining work and is runbook-driven, not blocked by code.
+test. The launcher above covers `openpi_aloha` and `molmoact2_yam` out of the
+box. GR00T is intentionally not in the launcher because its bindings depend on
+the chosen `embodiment_tag` and must be copied verbatim from the upstream
+modality config — use the cookbook + the adapter directly.
 
-| Policy adapter | File | Upstream runtime |
-| --- | --- | --- |
-| openpi `pi0_aloha_pen_uncap` | [openpi_aloha.py](vla_harness/adapters/policy/openpi_aloha.py) | official websocket server (`scripts/serve_policy.py`) |
-| `MolmoAct2-BimanualYAM` | [molmoact2_yam.py](vla_harness/adapters/policy/molmoact2_yam.py) | official FastAPI server (`examples/yam/host_server_yam.py`) |
-| GR00T | [gr00t.py](vla_harness/adapters/policy/gr00t.py) | official managed local server (`gr00t.policy.server_client`) |
+| Policy adapter | File | Upstream runtime | In launcher? |
+| --- | --- | --- | --- |
+| openpi `pi0_aloha_pen_uncap` | [openpi_aloha.py](vla_harness/adapters/policy/openpi_aloha.py) | official websocket server (`scripts/serve_policy.py`) | yes |
+| `MolmoAct2-BimanualYAM` | [molmoact2_yam.py](vla_harness/adapters/policy/molmoact2_yam.py) | official FastAPI server (`examples/yam/host_server_yam.py`) | yes |
+| GR00T | [gr00t.py](vla_harness/adapters/policy/gr00t.py) | official managed local server (`gr00t.policy.server_client`) | no (manual wiring) |
 
-| Embodiment adapter | File | Backend |
-| --- | --- | --- |
-| YAM bimanual | [yam_bimanual.py](vla_harness/adapters/embodiment/yam_bimanual.py) | official YAM `RobotEnv` |
-| DK-1 bimanual | [dk1_bimanual.py](vla_harness/adapters/embodiment/dk1_bimanual.py) | official `bi_dk1_follower` |
+| Embodiment adapter | File | Backend | In launcher? |
+| --- | --- | --- | --- |
+| YAM bimanual | [yam_bimanual.py](vla_harness/adapters/embodiment/yam_bimanual.py) | official YAM `RobotEnv` | yes (via `--backend-loader`) |
+| DK-1 bimanual | [dk1_bimanual.py](vla_harness/adapters/embodiment/dk1_bimanual.py) | official `bi_dk1_follower` | yes (via `--backend-loader`) |
+| Fake | built into the launcher | in-memory, zero-fill | yes (`--embodiment fake`) |
 
-To drive a real pair end-to-end, see
+Step-by-step instructions for standing up the real upstream server and robot
+are in
 [docs/runbooks/live-integration.md](docs/runbooks/live-integration.md).
+
+### Combining a Policy and Embodiment
+
+The launcher is the recommended entry point and surfaces the common knobs as
+CLI flags:
+
+| Scope | Flag | Used by |
+| --- | --- | --- |
+| run | `--prompt`, `--max-steps`, `--output-dir` | any |
+| run | `--dry-run` | swaps policy client + uses fake embodiment |
+| policy | `--server-url` | `molmoact2_yam` |
+| policy | `--host`, `--port` | `openpi_aloha` |
+| policy | `--device`, `--dtype` | any policy |
+| embodiment | `--backend-loader module:function` | `yam`, `dk1` |
+| embodiment | `--control-hz` | `yam`, `dk1` |
+| inspect | `--list-configs` | dumps every config field for every adapter |
+
+For anything not exposed as a flag, construct the adapter config in Python and
+pass it to `BimanualRunner` directly — the launcher is a ~250-line wrapper
+around the same public API.
 
 ## Layout
 
