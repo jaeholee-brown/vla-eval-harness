@@ -8,8 +8,8 @@ Outputs:
 
 - one `GR00T` runtime spike
 - one `MolmoAct2` runtime spike
-- one observed-pain report in `docs/pain/current-schema-observed-pain.md`
-- one upstream-default source map in `docs/spikes/upstream-default-source-map.md`
+- one observed-pain report in `docs/internal/pain/current-schema-observed-pain.md`
+- one upstream-default source map in `docs/internal/spikes/upstream-default-source-map.md`
 
 This phase is explicitly **not** for shipping polished adapters.
 
@@ -43,7 +43,7 @@ Questions to answer:
 
 Artifacts to produce:
 
-- short notes under the `GR00T` section of `docs/pain/current-schema-observed-pain.md`
+- short notes under the `GR00T` section of `docs/internal/pain/current-schema-observed-pain.md`
 - if needed, a tiny spike-only helper script under `scripts/` with a clear comment that it is for runtime probing, not production adapter architecture
 
 ## `MolmoAct2` Spike
@@ -67,14 +67,14 @@ Questions to answer:
 
 Artifacts to produce:
 
-- short notes under the `MolmoAct2` section of `docs/pain/current-schema-observed-pain.md`
+- short notes under the `MolmoAct2` section of `docs/internal/pain/current-schema-observed-pain.md`
 - if needed, a tiny spike-only helper script under `scripts/` with a clear comment that it is for runtime probing, not production adapter architecture
 
 ## Observed-Pain Report
 
 File:
 
-- `docs/pain/current-schema-observed-pain.md`
+- `docs/internal/pain/current-schema-observed-pain.md`
 
 Minimum sections to fill:
 
@@ -122,9 +122,9 @@ git -C /tmp/vla_sources/molmoact2 checkout 804ba37
 ### 2. Run the GR00T probe
 
 ```bash
-python3 scripts/spike_gr00t_current_schema.py \
+python3 scripts/legacy/spike_gr00t_current_schema.py \
   --gr00t-repo-root /tmp/vla_sources/Isaac-GR00T \
-  --write-json docs/spikes/artifacts/gr00t-current-schema.json
+  --write-json docs/internal/spikes/artifacts/gr00t-current-schema.json
 ```
 
 What this does:
@@ -143,9 +143,9 @@ Minimum success condition:
 ### 3. Run the MolmoAct2 probe
 
 ```bash
-python3 scripts/spike_molmoact2_current_schema.py \
+python3 scripts/legacy/spike_molmoact2_current_schema.py \
   --molmoact2-repo-root /tmp/vla_sources/molmoact2 \
-  --write-json docs/spikes/artifacts/molmoact2-current-schema.json
+  --write-json docs/internal/spikes/artifacts/molmoact2-current-schema.json
 ```
 
 What this does:
@@ -166,6 +166,6 @@ Minimum success condition:
 
 After both artifacts exist:
 
-- update `docs/pain/current-schema-observed-pain.md`
-- update `docs/spikes/upstream-default-source-map.md`
+- update `docs/internal/pain/current-schema-observed-pain.md`
+- update `docs/internal/spikes/upstream-default-source-map.md`
 - only then move to Phase 3

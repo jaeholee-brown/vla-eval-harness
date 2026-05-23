@@ -131,7 +131,7 @@ class DK1ActiveArmAdapter(CurrentSchemaEmbodimentAdapter):
                 choice="single_active_arm_only",
                 status="scoped_out",
                 rationale="Phase 1 uses one active arm on a bimanual DK-1 rig and parks the other arm outside the protocol.",
-                evidence="docs/spikes/current-schema-gap-matrix.md",
+                evidence="docs/internal/spikes/current-schema-gap-matrix.md",
             ),
             DecisionNote(
                 topic="embodiment.parked_arm_rule",

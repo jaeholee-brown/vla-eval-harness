@@ -200,7 +200,7 @@ class OpenPICurrentSchemaAdapter(CurrentSchemaPolicyAdapter):
                 choice="single_arm_flat_schema_only",
                 status="scoped_out",
                 rationale="Phase 1 intentionally targets only the current flat schema bootstrap path.",
-                evidence="docs/spikes/current-schema-gap-matrix.md",
+                evidence="docs/internal/spikes/current-schema-gap-matrix.md",
             ),
             DecisionNote(
                 topic="policy.preprocessing_claim",

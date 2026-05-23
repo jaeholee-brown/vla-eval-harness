@@ -71,13 +71,13 @@ Implemented and checked in:
 - `OpenPI` parity callables (with deterministic per-fixture noise so the
   flow-matching action parity test is meaningful)
 - DROID fixture fetcher
-- harness-side noise-aware openpi fidelity server (`scripts/serve_openpi_for_fidelity.py`)
+- harness-side noise-aware openpi fidelity server (`scripts/legacy/serve_openpi_for_fidelity.py`)
 - phase-1.5 fidelity runbook
 - phase-1.5 guard that refuses benchmark runs if fairness metadata claims official preprocessing but the adapter is still using the identity preprocessor
 - phase-2 source-backed runtime probes for `GR00T` and `MolmoAct2`
 - phase-2 observed-pain report
-- phase-2 JSON artifacts under `docs/spikes/artifacts/`
-- phase-2 upstream-default source map in `docs/spikes/upstream-default-source-map.md`
+- phase-2 JSON artifacts under `docs/internal/spikes/artifacts/`
+- phase-2 upstream-default source map in `docs/internal/spikes/upstream-default-source-map.md`
 
 Implemented but intentionally incomplete:
 
@@ -87,7 +87,7 @@ Closed on a GPU (no longer "incomplete"):
 
 - fidelity tests (preprocessing parity, action parity, negative control)
   pass against a live pi05_droid runtime when the env vars in
-  `docs/runbooks/phase-1.5-fidelity.md` are sourced; the recorded
+  `docs/internal/phase-1.5-fidelity.md` are sourced; the recorded
   tolerances live in that runbook
 
 Not implemented yet:
@@ -133,7 +133,7 @@ Status: complete.
 
 Deliverable already present:
 
-- `docs/spikes/current-schema-gap-matrix.md`
+- `docs/internal/spikes/current-schema-gap-matrix.md`
 
 This spike already established the critical constraint:
 
@@ -162,7 +162,7 @@ Code already present:
 - `vla_harness/legacy/openpi_current_schema.py`
 - `vla_harness/legacy/dk1_active_arm.py`
 - `vla_harness/legacy/openpi_callables.py`
-- `scripts/fetch_droid_fixtures.py`
+- `scripts/legacy/fetch_droid_fixtures.py`
 
 What changed after the GPU run:
 
@@ -210,13 +210,13 @@ Evidence required to close Phase 1.5:
 Earned tolerances (2026-05-22 RTX 5090, pi05_droid, 5 DROID fixtures):
 
 - preprocessing parity: `atol=0.0, rtol=0.0` (byte-identical, both callables route through `_run_image_through_official_transforms`)
-- action parity: `atol=2e-2, rtol=2e-2` with deterministic per-fixture noise piped through `scripts/serve_openpi_for_fidelity.py`; steady-state max abs diff was 3.3e-3, worst cold-cache excursion was 1.12e-2 (cuDNN auto-tuner divergence between two independent JAX processes — verified stable across 8 suite-mode repeats at 2e-2)
+- action parity: `atol=2e-2, rtol=2e-2` with deterministic per-fixture noise piped through `scripts/legacy/serve_openpi_for_fidelity.py`; steady-state max abs diff was 3.3e-3, worst cold-cache excursion was 1.12e-2 (cuDNN auto-tuner divergence between two independent JAX processes — verified stable across 8 suite-mode repeats at 2e-2)
 - negative control: `min_abs_diff=1e-4` separated cleanly on all three of `swap_rgb`, `zero_image`, `shuffle_prompt`
 - preprocess fail-on-purpose: pointing `OPENPI_HARNESS_PREPROCESS` at the identity callable failed the parity test (shape mismatch 180×320 vs 224×224)
 
 Runbook:
 
-- `docs/runbooks/phase-1.5-fidelity.md`
+- `docs/internal/phase-1.5-fidelity.md`
 
 Tests involved:
 
@@ -305,20 +305,20 @@ These are now assumptions the next phase should start from:
    Phase 2 does not need live `DK-1` hardware to discover schema and transport pain. The current next risk is model/runtime mismatch, not robot I/O.
 
 5. **Stock serving paths may be insufficient for fidelity work.**
-   `scripts/serve_openpi_for_fidelity.py` exists because the stock `openpi` server could not expose deterministic-noise control. This makes it more likely that `GR00T` and `MolmoAct2` spikes will need similarly small, spike-only runtime wrappers to make apples-to-apples comparisons possible.
+   `scripts/legacy/serve_openpi_for_fidelity.py` exists because the stock `openpi` server could not expose deterministic-noise control. This makes it more likely that `GR00T` and `MolmoAct2` spikes will need similarly small, spike-only runtime wrappers to make apples-to-apples comparisons possible.
 
 #### What Phase 2 actually ran
 
-- `scripts/spike_gr00t_current_schema.py`
+- `scripts/legacy/spike_gr00t_current_schema.py`
   - official source root: `/tmp/vla_sources/Isaac-GR00T`
   - commit: `3df8b38`
   - exercised the official DROID modality config and the official ZeroMQ `PolicyServer` / `PolicyClient`
-  - wrote `docs/spikes/artifacts/gr00t-current-schema.json`
-- `scripts/spike_molmoact2_current_schema.py`
+  - wrote `docs/internal/spikes/artifacts/gr00t-current-schema.json`
+- `scripts/legacy/spike_molmoact2_current_schema.py`
   - official source root: `/tmp/vla_sources/molmoact2`
   - commit: `804ba37`
   - exercised the official DROID and YAM FastAPI apps through `build_app(...)` and `TestClient`
-  - wrote `docs/spikes/artifacts/molmoact2-current-schema.json`
+  - wrote `docs/internal/spikes/artifacts/molmoact2-current-schema.json`
 
 #### Phase 2 outcomes
 
@@ -338,8 +338,8 @@ These are now assumptions the next phase should start from:
 
 File to write:
 
-- `docs/pain/current-schema-observed-pain.md`
-- `docs/spikes/upstream-default-source-map.md`
+- `docs/internal/pain/current-schema-observed-pain.md`
+- `docs/internal/spikes/upstream-default-source-map.md`
 
 Required sections:
 
@@ -358,8 +358,8 @@ Phase 2 exit criteria:
 - the report is based on real runtime experience, not only paper reasoning
 - the report is specific enough that Phase 3 can be written as implementation work, not fresh exploration
 
-Status update: satisfied. The report is in `docs/pain/current-schema-observed-pain.md`.
-The source map is in `docs/spikes/upstream-default-source-map.md`.
+Status update: satisfied. The report is in `docs/internal/pain/current-schema-observed-pain.md`.
+The source map is in `docs/internal/spikes/upstream-default-source-map.md`.
 
 ### Phase 3: harness internal representation
 
@@ -430,7 +430,7 @@ Phase 3 exit criteria:
 Recommended first implementation order inside Phase 3:
 
 1. define typed dataclasses for stream names, stream sampling, stream semantics, camera roles, and named left/right arm groupings
-2. encode the direct-copy fields identified in `docs/spikes/upstream-default-source-map.md`
+2. encode the direct-copy fields identified in `docs/internal/spikes/upstream-default-source-map.md`
 3. make sure the representation can express `MolmoAct2-BimanualYAM` and a true-bimanual `DK-1` embodiment without projection hacks
 4. migrate `OpenPI + DK-1` through the new representation without changing its already-earned parity behavior, but only as a legacy bootstrap bridge
 5. only then add the benchmark-derived projection hooks needed for GR00T and DROID-style bridge cases
@@ -537,7 +537,7 @@ Before declaring any phase complete, re-read its exit criteria with the north st
 Do this before anything else:
 
 1. install `openpi` and `lerobot`
-2. fetch fixtures with `scripts/fetch_droid_fixtures.py`
+2. fetch fixtures with `scripts/legacy/fetch_droid_fixtures.py`
 3. stand up the official `openpi` websocket runtime
 4. export the runbook env vars
 5. run the three fidelity tests in order
@@ -548,11 +548,11 @@ This step is now complete for `OpenPI`.
 
 The exact commands are already documented in:
 
-- `docs/runbooks/phase-1.5-fidelity.md`
+- `docs/internal/phase-1.5-fidelity.md`
 
 The next spike checklist is documented in:
 
-- `docs/runbooks/phase-2-runtime-spikes.md`
+- `docs/internal/phase-2-runtime-spikes.md`
 
 ## Immediate Next Commit After GPU Validation
 
@@ -566,4 +566,4 @@ After the current code state, the next work is live validation:
 
 The live-validation checklist is documented in:
 
-- `docs/runbooks/phase-4-live-integration.md`
+- `docs/runbooks/live-integration.md`

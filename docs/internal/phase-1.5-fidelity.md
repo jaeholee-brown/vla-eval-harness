@@ -29,7 +29,7 @@ not for unit tests, so the default `uv sync` install does not pull them in.
 ## Step 1: Fetch real DROID frames as fixtures
 
 ```bash
-python scripts/fetch_droid_fixtures.py --num-frames 5
+python scripts/legacy/fetch_droid_fixtures.py --num-frames 5
 ```
 
 This downloads the public `lerobot/droid_100` dataset (MIT licensed,
@@ -58,7 +58,7 @@ JAX preallocation):
 
 ```bash
 XLA_PYTHON_CLIENT_PREALLOCATE=false XLA_PYTHON_CLIENT_MEM_FRACTION=0.40 \
-    uv run python scripts/serve_openpi_for_fidelity.py \
+    uv run python scripts/legacy/serve_openpi_for_fidelity.py \
         --config pi05_droid \
         --checkpoint-dir gs://openpi-assets/checkpoints/pi05_droid \
         --port 8000
@@ -211,7 +211,7 @@ loosened values — that is the entire point of recording them.
 
 - Action parity fails with `Max relative difference ~40x` and 100% of
   elements mismatched — you are pointed at the stock openpi
-  `serve_policy.py`, not `scripts/serve_openpi_for_fidelity.py`. The
+  `serve_policy.py`, not `scripts/legacy/serve_openpi_for_fidelity.py`. The
   stock server ignores the `noise` key in obs, so the two legs sample
   independent flow-matching noise and cannot match.
 
@@ -233,4 +233,4 @@ the tests can detect regressions, move on to the Phase 2 spike:
 - stand up one `GR00T` `managed_local_server` runtime
 - stand up one official `MolmoAct2` FastAPI server
 - force-fit both through the current adapter shape
-- write the observed pain report into `docs/pain/`
+- write the observed pain report into `docs/internal/pain/`

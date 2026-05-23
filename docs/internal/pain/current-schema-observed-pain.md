@@ -7,14 +7,14 @@ This report is based on real phase-2 spike work against official source trees:
 
 Probe artifacts used to generate these notes:
 
-- `scripts/spike_gr00t_current_schema.py`
-- `scripts/spike_molmoact2_current_schema.py`
-- `docs/spikes/artifacts/gr00t-current-schema.json`
-- `docs/spikes/artifacts/molmoact2-current-schema.json`
+- `scripts/legacy/spike_gr00t_current_schema.py`
+- `scripts/legacy/spike_molmoact2_current_schema.py`
+- `docs/internal/spikes/artifacts/gr00t-current-schema.json`
+- `docs/internal/spikes/artifacts/molmoact2-current-schema.json`
 
 Default-source follow-up for future adapter templates:
 
-- `docs/spikes/upstream-default-source-map.md`
+- `docs/internal/spikes/upstream-default-source-map.md`
 
 Both were run locally against the official source trees. The GR00T spike used the official DROID modality config plus the official ZeroMQ `PolicyServer` / `PolicyClient` transport. The MolmoAct2 spike used the official FastAPI `build_app(...)` functions for both DROID and YAM with stub policies, so the request/response behavior came from the real server modules without loading model weights.
 
@@ -24,7 +24,7 @@ Both were run locally against the official source trees. The GR00T spike used th
 - Exact preprocessing parity is realistic when the official transform is directly reusable.
 - Negative controls are mandatory because a parity battery that cannot fail on purpose is not useful.
 - Offline replay fixtures are enough for early model-side pressure testing.
-- Small spike-only runtime wrappers are acceptable when the stock serving path cannot expose the controls needed for faithful comparison. `scripts/serve_openpi_for_fidelity.py` established that precedent.
+- Small spike-only runtime wrappers are acceptable when the stock serving path cannot expose the controls needed for faithful comparison. `scripts/legacy/serve_openpi_for_fidelity.py` established that precedent.
 
 ## GR00T Pain
 

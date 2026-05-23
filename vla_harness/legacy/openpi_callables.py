@@ -188,7 +188,7 @@ def harness_action(obs: dict[str, Any]) -> dict[str, Any]:
     """Call the harness OpenPI adapter, which routes through the websocket.
 
     We piggyback the same deterministic noise tensor inside the obs dict.
-    ``scripts/serve_openpi_for_fidelity.py`` strips it off and forwards it
+    ``scripts/legacy/serve_openpi_for_fidelity.py`` strips it off and forwards it
     to ``Policy.infer(obs, noise=noise)``; the stock openpi websocket
     server ignores extra keys, in which case action parity will diverge
     because of independent RNG advancement (this is why the fidelity
