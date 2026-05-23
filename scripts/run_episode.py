@@ -38,12 +38,6 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping
 
-# Make `scripts.backends.<robot>` importable when this file is invoked as
-# `python scripts/run_episode.py` (which only puts `scripts/` on sys.path).
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
 import numpy as np
 
 from vla_harness.adapters.embodiment.bimanual import BimanualEmbodimentAdapter
@@ -85,11 +79,6 @@ from vla_harness.runner import BimanualRunConfig, BimanualRunner
 POLICY_CHOICES = ("openpi_aloha", "molmoact2_yam")
 EMBODIMENT_CHOICES = ("fake", "yam", "dk1")
 
-DEFAULT_BACKEND_LOADERS: Mapping[str, str] = {
-    "yam": "scripts.backends.yam_robotenv:make_backend",
-    "dk1": "scripts.backends.dk1_bidk1:make_backend",
-}
-
 
 def build_policy(args: argparse.Namespace) -> BimanualPolicyAdapter:
     if args.policy == "molmoact2_yam":
@@ -112,14 +101,12 @@ def build_embodiment(args: argparse.Namespace, manifest: HarnessManifest) -> Bim
         return FakeBimanualEmbodiment(manifest)
 
     if args.embodiment == "yam":
-        loader = args.backend_loader or DEFAULT_BACKEND_LOADERS["yam"]
-        backend = _load_backend(loader, kind="yam", config_path=args.yam_config)
+        backend = _load_backend(args.backend_loader, kind="yam")
         kwargs = _kwargs_from(args, {"control_hz": "control_hz"})
         return YAMBimanualAdapter(backend=backend, config=YAMBimanualConfig(**kwargs))
 
     if args.embodiment == "dk1":
-        loader = args.backend_loader or DEFAULT_BACKEND_LOADERS["dk1"]
-        backend = _load_backend(loader, kind="dk1", config_path=args.dk1_config)
+        backend = _load_backend(args.backend_loader, kind="dk1")
         kwargs = _kwargs_from(args, {"control_hz": "control_hz"})
         return DK1BimanualAdapter(backend=backend, config=DK1BimanualConfig(**kwargs))
 
@@ -136,17 +123,18 @@ def _kwargs_from(args: argparse.Namespace, mapping: Mapping[str, str]) -> dict[s
     return out
 
 
-def _load_backend(spec: str, *, kind: str, config_path: str | None) -> Any:
+def _load_backend(spec: str | None, *, kind: str) -> Any:
+    if spec is None:
+        raise SystemExit(
+            f"--embodiment {kind} requires --backend-loader module:function pointing at a callable "
+            f"that returns a real {kind} backend. Pass --embodiment fake if you don't have hardware."
+        )
     module_name, _, attr = spec.partition(":")
     if not module_name or not attr:
         raise SystemExit(f"--backend-loader must be 'module:function', got {spec!r}")
     module = importlib.import_module(module_name)
     factory = getattr(module, attr)
-    try:
-        return factory(config_path=config_path)
-    except TypeError:
-        # Loaders that pre-date the config_path contract are still allowed.
-        return factory()
+    return factory()
 
 
 class FakeBimanualEmbodiment(BimanualEmbodimentAdapter):
@@ -279,11 +267,7 @@ def list_configs() -> None:
     print("  --max-steps INT           number of policy steps to run (default 1)")
     print("  --output-dir PATH         fairness log directory (default runs/)")
     print("  --dry-run                 swap policy client + use fake embodiment")
-    print()
-    print("Embodiment loader (yam/dk1):")
-    print(f"  --yam-config PATH         forwarded to {DEFAULT_BACKEND_LOADERS['yam']}")
-    print(f"  --dk1-config PATH         forwarded to {DEFAULT_BACKEND_LOADERS['dk1']}")
-    print("  --backend-loader M:F      override the default loader above")
+    print("  --backend-loader M:F      factory for the real yam/dk1 backend")
     print()
     print("Anything not exposed as a CLI flag can be overridden by writing a small")
     print("Python wrapper that constructs the adapter config directly. See README.")
@@ -333,19 +317,8 @@ def main(argv: list[str] | None = None) -> int:
     embodiment_group = parser.add_argument_group("embodiment knobs")
     embodiment_group.add_argument("--control-hz", type=float, help="Control loop Hz for yam/dk1.")
     embodiment_group.add_argument(
-        "--yam-config",
-        help="Path to your YAM robot config (passed to the default yam backend loader).",
-    )
-    embodiment_group.add_argument(
-        "--dk1-config",
-        help="Path to your DK-1 robot config (passed to the default dk1 backend loader).",
-    )
-    embodiment_group.add_argument(
         "--backend-loader",
-        help=(
-            "Override the default backend loader for --embodiment yam/dk1. "
-            "Format module:function. Defaults: yam=%(default)s." % {"default": DEFAULT_BACKEND_LOADERS["yam"]}
-        ),
+        help="module:function that returns a real yam/dk1 backend. Required unless --dry-run or --embodiment fake.",
     )
 
     args = parser.parse_args(argv)

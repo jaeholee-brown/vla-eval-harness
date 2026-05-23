@@ -67,8 +67,7 @@ def test_list_configs_prints_field_table(capsys):
     assert "control_hz" in out
 
 
-def test_missing_yam_config_uses_default_loader_and_errors_clearly(tmp_path):
-    """--embodiment yam now defaults to the shipped loader, which expects --yam-config."""
+def test_missing_backend_loader_for_real_embodiment_errors(tmp_path):
     main = _load_main()
     with pytest.raises(SystemExit) as exc:
         main(
@@ -79,63 +78,4 @@ def test_missing_yam_config_uses_default_loader_and_errors_clearly(tmp_path):
                 "--output-dir", str(tmp_path),
             ]
         )
-    msg = str(exc.value)
-    assert "--yam-config" in msg
-
-
-def test_custom_backend_loader_receives_config_path(tmp_path, monkeypatch):
-    """A user-supplied --backend-loader must receive the --yam-config kwarg."""
-    import sys
-    import types
-
-    received: dict[str, object] = {}
-
-    fake_module = types.ModuleType("user_yam_backend_for_test")
-
-    class _FakeBackend:
-        def prepare_episode(self, prompt):
-            return None
-
-        def capture(self):
-            import numpy as np
-            from vla_harness.adapters.embodiment._sample_types import BimanualObservationSample
-            return BimanualObservationSample(
-                camera_frames={
-                    "front_camera": np.zeros((8, 8, 3), dtype=np.uint8),
-                    "left_camera": np.zeros((8, 8, 3), dtype=np.uint8),
-                    "right_camera": np.zeros((8, 8, 3), dtype=np.uint8),
-                },
-                arm_state_streams={
-                    "left_arm": {"joint_position": np.zeros(7, dtype="float32")},
-                    "right_arm": {"joint_position": np.zeros(7, dtype="float32")},
-                },
-            )
-
-        def execute_chunk(self, arm_actions, *, padding_rules, manifest):
-            return None
-
-        def close(self):
-            return None
-
-    def make_backend(*, config_path=None, **_):
-        received["config_path"] = config_path
-        return _FakeBackend()
-
-    fake_module.make_backend = make_backend
-    monkeypatch.setitem(sys.modules, "user_yam_backend_for_test", fake_module)
-
-    main = _load_main()
-    rc = main(
-        [
-            "--policy", "molmoact2_yam",
-            "--embodiment", "yam",
-            "--backend-loader", "user_yam_backend_for_test:make_backend",
-            "--yam-config", "/etc/yam/test.yaml",
-            "--dry-run",  # fake the policy client
-            "--prompt", "smoke",
-            "--max-steps", "1",
-            "--output-dir", str(tmp_path),
-        ]
-    )
-    assert rc == 0
-    assert received["config_path"] == "/etc/yam/test.yaml"
+    assert "backend-loader" in str(exc.value)

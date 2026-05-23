@@ -30,35 +30,15 @@ python scripts/run_episode.py \
 ```
 
 That writes a fairness log under `runs/<run-id>/decision_log.json` showing
-exactly what the policy + embodiment combination claimed and used.
+exactly what the policy + embodiment combination claimed and used. From here
+you can:
 
-Once you actually have the upstream stacks installed, the *same launcher*
-drives a real episode by pointing at config paths — no Python edits required:
-
-```bash
-# molmoact2_yam policy + real YAM robot
-python scripts/run_episode.py \
-    --policy molmoact2_yam --server-url http://127.0.0.1:8202/act \
-    --embodiment yam --yam-config /etc/yam/my_rig.yaml \
-    --prompt "pack the blocks" --max-steps 50
-
-# openpi_aloha policy + real DK-1 robot
-python scripts/run_episode.py \
-    --policy openpi_aloha --host 127.0.0.1 --port 8000 \
-    --embodiment dk1 --dk1-config /etc/dk1/my_rig.json \
-    --prompt "uncap the pen" --max-steps 50
-```
-
-`--yam-config` and `--dk1-config` get forwarded to default backend loaders
-shipped in [scripts/backends/](scripts/backends/). The loaders import the
-canonical upstream robot SDK (`gello.envs.yam_real_env.YAMRealEnv`,
-`lerobot.robots.bi_dk1_follower.BiDK1Follower`) and hand the rest off to the
-harness. If your fork uses a different module path or constructor keyword,
-copy the relevant `scripts/backends/<robot>.py`, edit the one marked block
-inside it, and point `--backend-loader` at your copy.
-
-Run `python scripts/run_episode.py --list-configs` to see every tweakable
-config field, its default, and which CLI flag (if any) is wired to it.
+- swap `--embodiment fake` for `--embodiment yam` (or `dk1`) and supply
+  `--backend-loader my_robot:make_backend` to drive a real robot;
+- drop `--dry-run` and pass `--server-url …` (or `--host/--port`) to talk to
+  the real upstream policy server;
+- run `python scripts/run_episode.py --list-configs` to see every tweakable
+  config field with its default for every policy and embodiment.
 
 ## Available Adapter Pairs
 
@@ -74,11 +54,11 @@ modality config — use the cookbook + the adapter directly.
 | `MolmoAct2-BimanualYAM` | [molmoact2_yam.py](vla_harness/adapters/policy/molmoact2_yam.py) | official FastAPI server (`examples/yam/host_server_yam.py`) | yes |
 | GR00T | [gr00t.py](vla_harness/adapters/policy/gr00t.py) | official managed local server (`gr00t.policy.server_client`) | no (manual wiring) |
 
-| Embodiment adapter | File | Backend (auto-loaded) | Launcher flag |
+| Embodiment adapter | File | Backend | In launcher? |
 | --- | --- | --- | --- |
-| YAM bimanual | [yam_bimanual.py](vla_harness/adapters/embodiment/yam_bimanual.py) | [`scripts/backends/yam_robotenv.py`](scripts/backends/yam_robotenv.py) → `gello.envs.yam_real_env.YAMRealEnv` | `--embodiment yam --yam-config PATH` |
-| DK-1 bimanual | [dk1_bimanual.py](vla_harness/adapters/embodiment/dk1_bimanual.py) | [`scripts/backends/dk1_bidk1.py`](scripts/backends/dk1_bidk1.py) → `lerobot.robots.bi_dk1_follower.BiDK1Follower` | `--embodiment dk1 --dk1-config PATH` |
-| Fake | built into the launcher | in-memory, zero-fill | `--embodiment fake` |
+| YAM bimanual | [yam_bimanual.py](vla_harness/adapters/embodiment/yam_bimanual.py) | official YAM `RobotEnv` | yes (via `--backend-loader`) |
+| DK-1 bimanual | [dk1_bimanual.py](vla_harness/adapters/embodiment/dk1_bimanual.py) | official `bi_dk1_follower` | yes (via `--backend-loader`) |
+| Fake | built into the launcher | in-memory, zero-fill | yes (`--embodiment fake`) |
 
 Step-by-step instructions for standing up the real upstream server and robot
 are in
@@ -96,8 +76,7 @@ CLI flags:
 | policy | `--server-url` | `molmoact2_yam` |
 | policy | `--host`, `--port` | `openpi_aloha` |
 | policy | `--device`, `--dtype` | any policy |
-| embodiment | `--yam-config PATH` / `--dk1-config PATH` | `yam` / `dk1` (forwarded to the default backend loader) |
-| embodiment | `--backend-loader module:function` | override the default loader if your fork diverges |
+| embodiment | `--backend-loader module:function` | `yam`, `dk1` |
 | embodiment | `--control-hz` | `yam`, `dk1` |
 | inspect | `--list-configs` | dumps every config field for every adapter |
 
@@ -163,16 +142,6 @@ Implement:
 3. A short worked-example addition in `docs/cookbook/adapter-authoring.md`
    under §2.7 (policies) or a new §3.6 (embodiments), modeled on the existing
    `pi0_aloha_pen_uncap` entry.
-4. For embodiments only: `scripts/backends/{{module_name}}.py` — a backend
-   loader following the shape of `scripts/backends/yam_robotenv.py`: lazy
-   import of the upstream robot SDK, `make_backend(*, config_path=None, **_)`
-   entry point, and a clearly-marked block at the constructor call that a
-   downstream user can edit if their fork diverges. Add a matching
-   `--<embodiment>-config PATH` flag to `scripts/run_episode.py` and register
-   the default loader in `DEFAULT_BACKEND_LOADERS`. After this step the new
-   embodiment should be runnable as
-   `python scripts/run_episode.py --embodiment {{name}} --{{name}}-config PATH …`
-   with no further Python edits.
 
 The adapter must:
 - delegate to the official runtime; do not duplicate normalization, image
